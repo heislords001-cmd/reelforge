@@ -1,3 +1,4 @@
+import cookieParser from 'cookie-parser';
 import cors from 'cors';
 import express from 'express';
 import helmet from 'helmet';
@@ -21,6 +22,7 @@ export function createApp() {
 
   app.use(helmet());
   app.use(cors({ origin: env.clientOrigin, credentials: true }));
+  app.use(cookieParser());
   app.use(
     express.json({
       limit: '2mb',

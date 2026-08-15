@@ -39,7 +39,7 @@ export default {
       },
       backgroundImage: {
         'signal-gradient': 'linear-gradient(135deg, #7C5CFF 0%, #FF8A5B 100%)',
-        'aurora': 'radial-gradient(60% 60% at 20% 0%, rgba(124,92,255,0.20) 0%, rgba(8,8,12,0) 60%), radial-gradient(50% 50% at 90% 10%, rgba(255,138,91,0.14) 0%, rgba(8,8,12,0) 60%)',
+        'aurora': 'radial-gradient(45% 45% at 50% -5%, rgba(255,255,255,0.06) 0%, rgba(8,8,12,0) 60%), radial-gradient(60% 60% at 20% 0%, rgba(124,92,255,0.20) 0%, rgba(8,8,12,0) 60%), radial-gradient(50% 50% at 90% 10%, rgba(255,138,91,0.14) 0%, rgba(8,8,12,0) 60%)',
       },
       boxShadow: {
         glow: '0 0 0 1px rgba(124,92,255,0.4), 0 8px 40px -8px rgba(124,92,255,0.45)',

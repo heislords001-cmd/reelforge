@@ -19,6 +19,18 @@ export const env = {
   jwtSecret: required('JWT_SECRET'),
   jwtExpiresIn: process.env.JWT_EXPIRES_IN ?? '7d',
 
+  google: {
+    clientId: process.env.GOOGLE_CLIENT_ID ?? '',
+    clientSecret: process.env.GOOGLE_CLIENT_SECRET ?? '',
+    // Where Google redirects back to after the user approves. Must exactly match one of
+    // the Authorized redirect URIs configured in the Google Cloud Console credential.
+    callbackUrl: process.env.GOOGLE_CALLBACK_URL ?? '',
+    // Separate credential, separate Google product. This is a Gemini API key from Google
+    // AI Studio, used for Nano Banana image generation, not the OAuth client above.
+    geminiApiKey: process.env.GOOGLE_GEMINI_API_KEY ?? '',
+    geminiImageModel: process.env.GOOGLE_GEMINI_IMAGE_MODEL ?? 'gemini-3.1-flash-image-preview',
+  },
+
   groq: {
     apiKey: process.env.GROQ_API_KEY ?? '',
     model: process.env.GROQ_MODEL ?? 'llama-3.3-70b-versatile',

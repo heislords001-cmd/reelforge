@@ -96,6 +96,45 @@ background job queue (Vercel Queues, Inngest, Trigger.dev) fronted by a
 initial deploy needs, but worth knowing is the actual answer rather than a workaround piled
 on top of function timeouts.
 
+## Google sign in
+
+Users can sign up or sign in with Google, in addition to email and password. The flow is a
+plain OAuth2 authorization code exchange (`server-lib/routes/auth.routes.ts`), no third
+party auth library, matching the rest of this codebase's preference for direct fetch calls
+over heavy SDKs. A short lived, httpOnly cookie carries the CSRF state parameter across the
+redirect to Google and back.
+
+**Setup on Google's side:**
+1. console.cloud.google.com, APIs and Services, OAuth consent screen: set an app name and
+   support email, add the `email`, `profile`, and `openid` scopes
+2. APIs and Services, Credentials, Create Credentials, OAuth Client ID, type Web application
+3. Under Authorized redirect URIs, add both your production URL and local dev URL:
+   `https://yourdomain.vercel.app/api/auth/google/callback` and
+   `http://localhost:4000/api/auth/google/callback`
+4. Copy the Client ID and Client Secret into `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET`,
+   and set `GOOGLE_CALLBACK_URL` to whichever redirect URI matches where you're running
+
+An account signing in with Google that shares an email with an existing password account
+gets linked to it automatically rather than creating a duplicate. `password_hash` is
+nullable in the schema specifically to allow Google only accounts that never set one.
+
+## Nano Banana (premium image tier)
+
+Premium accounts generate images with Nano Banana (Gemini 3.1 Flash Image) instead of FLUX
+Schnell, a genuinely stronger, paid model rather than just more variants of the same free
+one. This uses a different Google credential entirely from the OAuth sign in above, a Gemini
+API key, not an OAuth client.
+
+**Setup:**
+1. aistudio.google.com, sign in, Get API key, create one tied to a Google Cloud project with
+   billing enabled (the free tier is rate limited too low for production use)
+2. Copy it into `GOOGLE_GEMINI_API_KEY`
+
+Free tier stays on FLUX Schnell regardless, both for cost and because FLUX Dev (a stronger
+FLUX tier) turned out to be licensed for non-commercial use only on NVIDIA's hosting, not
+something to build a paid product on. Nano Banana solved that same problem with an actually
+commercial, paid API instead.
+
 ## Billing (trial → premium)
 
 Every new account gets a 30-day trial that behaves exactly like premium. Full-quality
@@ -133,6 +172,8 @@ satisfies `PaymentProvider` (`server-lib/providers/payment/types.ts`) and pointi
 |---|---|
 | `DATABASE_URL` | PostgreSQL connection string (pooled, if deploying to Vercel) |
 | `JWT_SECRET` | Signing secret for auth tokens |
+| `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` / `GOOGLE_CALLBACK_URL` | Google sign in, from Google Cloud Console |
+| `GOOGLE_GEMINI_API_KEY` | Nano Banana image generation for premium accounts, from Google AI Studio, a separate credential from the OAuth one above |
 | `NVIDIA_API_KEY` | Powers everything AI: script (free + premium tiers), images (FLUX.1 Schnell), voice (Chatterbox). All on NVIDIA's free build.nvidia.com catalog |
 | `GROQ_API_KEY` | Optional. An alternative script provider, not required by default (see `server-lib/providers/registry.ts`) |
 | `PAYSTACK_SECRET_KEY` / `PAYSTACK_PUBLIC_KEY` | From Paystack's API Keys settings |

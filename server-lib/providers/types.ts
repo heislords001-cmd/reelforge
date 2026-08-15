@@ -33,6 +33,7 @@ export interface ImageGenerationResult {
 
 export interface ImageProvider {
   readonly name: string;
+  readonly model: string;
   generateImage(input: ImageGenerationInput): Promise<ImageGenerationResult>;
 }
 

@@ -15,6 +15,7 @@ const STYLE_PRESETS: Record<string, string> = {
 
 export class NvidiaFluxProvider implements ImageProvider {
   readonly name = 'nvidia-flux-schnell';
+  readonly model = env.nvidia.fluxModel;
 
   async generateImage(input: ImageGenerationInput): Promise<ImageGenerationResult> {
     if (!env.nvidia.apiKey) {
