@@ -35,6 +35,20 @@ const FEATURES = [
   'Download images and narration for your own edit',
 ];
 
+const FREE_TIER = [
+  'Script, image, and voice generation',
+  'One image per scene',
+  'Three narration styles',
+  'Unlimited projects',
+];
+
+const PREMIUM_TIER = [
+  'A stronger model for every script',
+  'Multiple image variants per scene to choose from',
+  'All seven narration styles, including expressive ones',
+  'Cancel anytime',
+];
+
 export default function Landing() {
   const token = useAuthStore((s) => s.token);
   if (token) return <Navigate to="/dashboard" replace />;
@@ -49,6 +63,14 @@ export default function Landing() {
             </span>
             <span className="font-display text-[15px] font-semibold tracking-tight">Reelforge</span>
           </div>
+          <nav className="hidden items-center gap-6 text-sm text-ink-muted md:flex">
+            <a href="#pipeline" className="hover:text-ink">
+              How it works
+            </a>
+            <a href="#pricing" className="hover:text-ink">
+              Pricing
+            </a>
+          </nav>
           <div className="flex items-center gap-2">
             <Link to="/login" className="btn-ghost">
               Sign in
@@ -96,29 +118,33 @@ export default function Landing() {
         </section>
 
         {/* Pipeline */}
-        <section className="mx-auto max-w-6xl px-6 pb-24">
+        <section id="pipeline" className="mx-auto max-w-6xl scroll-mt-24 px-6 pb-24">
           <div className="mb-10 text-center">
             <p className="label-eyebrow mb-2 text-signal-400">How it works</p>
             <h2 className="text-2xl font-semibold sm:text-3xl">Three steps, one prompt.</h2>
           </div>
           <div className="grid grid-cols-1 gap-5 sm:grid-cols-3">
             {PIPELINE.map((step, i) => (
-              <div key={step.title} className="glass-card animate-fade-up p-6" style={{ animationDelay: `${i * 80}ms` }}>
-                <div className="mb-4 flex items-center gap-3">
-                  <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-signal-500/15 text-signal-300">
-                    <step.icon size={17} />
-                  </span>
-                  <span className="text-xs font-medium text-ink-faint">Step {i + 1}</span>
-                </div>
-                <h3 className="mb-1.5 text-base font-semibold">{step.title}</h3>
-                <p className="text-sm leading-relaxed text-ink-muted">{step.description}</p>
+              <div
+                key={step.title}
+                className="glass-card relative animate-fade-up overflow-hidden p-6"
+                style={{ animationDelay: `${i * 80}ms` }}
+              >
+                <span className="pointer-events-none absolute -right-2 -top-4 font-display text-7xl font-semibold text-white/[0.04]">
+                  0{i + 1}
+                </span>
+                <span className="relative mb-4 flex h-9 w-9 items-center justify-center rounded-lg bg-signal-500/15 text-signal-300">
+                  <step.icon size={17} />
+                </span>
+                <h3 className="relative mb-1.5 text-base font-semibold">{step.title}</h3>
+                <p className="relative text-sm leading-relaxed text-ink-muted">{step.description}</p>
               </div>
             ))}
           </div>
         </section>
 
         {/* Feature list */}
-        <section className="mx-auto max-w-4xl px-6 pb-28">
+        <section className="mx-auto max-w-4xl px-6 pb-24">
           <div className="glass-card grid grid-cols-1 gap-4 p-8 sm:grid-cols-2">
             {FEATURES.map((feature) => (
               <div key={feature} className="flex items-start gap-2.5">
@@ -128,6 +154,50 @@ export default function Landing() {
                 <span className="text-sm text-ink/90">{feature}</span>
               </div>
             ))}
+          </div>
+        </section>
+
+        {/* Pricing */}
+        <section id="pricing" className="mx-auto max-w-4xl scroll-mt-24 px-6 pb-28">
+          <div className="mb-4 text-center">
+            <p className="label-eyebrow mb-2 text-signal-400">Pricing</p>
+            <h2 className="text-2xl font-semibold sm:text-3xl">Start free, upgrade if you need more.</h2>
+          </div>
+          <p className="mx-auto mb-10 max-w-md text-center text-sm text-ink-muted">
+            Every new account gets a 30 day trial of premium quality generation, no card required.
+          </p>
+
+          <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
+            <div className="glass-card p-7">
+              <h3 className="mb-1 text-base font-semibold">Free</h3>
+              <p className="mb-5 text-2xl font-semibold">$0</p>
+              <div className="space-y-2.5">
+                {FREE_TIER.map((item) => (
+                  <div key={item} className="flex items-start gap-2.5 text-sm text-ink-muted">
+                    <Check size={14} className="mt-0.5 flex-shrink-0 text-ink-faint" />
+                    {item}
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="glass-card relative overflow-hidden border-signal-500/30 p-7">
+              <span className="absolute right-5 top-5 rounded-full bg-signal-gradient px-2.5 py-1 text-[10px] font-semibold text-white">
+                Recommended
+              </span>
+              <h3 className="mb-1 text-base font-semibold">Premium</h3>
+              <p className="mb-5 text-2xl font-semibold">
+                $10 <span className="text-sm font-normal text-ink-muted">per month</span>
+              </p>
+              <div className="space-y-2.5">
+                {PREMIUM_TIER.map((item) => (
+                  <div key={item} className="flex items-start gap-2.5 text-sm text-ink/90">
+                    <Check size={14} className="mt-0.5 flex-shrink-0 text-signal-400" />
+                    {item}
+                  </div>
+                ))}
+              </div>
+            </div>
           </div>
 
           <div className="mt-10 text-center">
@@ -139,8 +209,19 @@ export default function Landing() {
       </main>
 
       <footer className="border-t border-white/[0.06] px-6 py-8">
-        <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-3 text-xs text-ink-faint sm:flex-row">
+        <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-4 text-xs text-ink-faint sm:flex-row">
           <span>© {new Date().getFullYear()} Reelforge</span>
+          <div className="flex items-center gap-5">
+            <Link to="/terms" className="hover:text-ink">
+              Terms
+            </Link>
+            <Link to="/privacy" className="hover:text-ink">
+              Privacy
+            </Link>
+            <Link to="/cookies" className="hover:text-ink">
+              Cookies
+            </Link>
+          </div>
           <div className="flex items-center gap-2.5">
             <span className="flex h-5 w-5 items-center justify-center rounded bg-signal-gradient">
               <Clapperboard className="text-white" size={11} />

@@ -38,6 +38,13 @@ export const subscriptionService = {
     return this.isPremiumActive(user) ? 'nvidia-premium' : 'nvidia-free';
   },
 
+  /** Free tier stays on FLUX Schnell (commercially safe, no licensing concern). Premium
+   *  gets Nano Banana, a genuinely stronger, paid model, the same free/premium split
+   *  pattern as scripts, once a real commercially licensed option was available for images. */
+  imageProviderNameFor(user: Pick<User, 'plan' | 'trial_ends_at'>): string {
+    return this.isPremiumActive(user) ? 'nano-banana' : 'nvidia-flux-schnell';
+  },
+
   async getBillingStatus(userId: string): Promise<BillingStatus> {
     const { rows } = await query<User>('SELECT plan, trial_ends_at FROM users WHERE id = $1', [userId]);
     const user = rows[0];

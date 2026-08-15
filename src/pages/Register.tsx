@@ -4,6 +4,7 @@ import { Clapperboard } from 'lucide-react';
 import { api, errorMessage } from '../lib/api';
 import { useAuthStore } from '../store/authStore';
 import { Spinner } from '../components/ui/Primitives';
+import { GoogleButton } from '../components/auth/GoogleButton';
 
 export default function Register() {
   const [name, setName] = useState('');
@@ -40,39 +41,61 @@ export default function Register() {
           <p className="text-sm text-ink-muted">One idea in, a finished video package out.</p>
         </div>
 
-        <form onSubmit={onSubmit} className="glass-card space-y-4 p-6">
+        <div className="glass-card space-y-4 p-6">
           {error && <p className="rounded-lg bg-ember-500/10 px-3 py-2 text-xs text-ember-400">{error}</p>}
-          <div>
-            <label className="label-eyebrow mb-1.5 block">Name</label>
-            <input required className="input-field" value={name} onChange={(e) => setName(e.target.value)} placeholder="Ada Creator" />
+
+          <GoogleButton label="Sign up with Google" />
+
+          <div className="flex items-center gap-3 py-1">
+            <div className="h-px flex-1 bg-white/[0.08]" />
+            <span className="text-[11px] text-ink-faint">or</span>
+            <div className="h-px flex-1 bg-white/[0.08]" />
           </div>
-          <div>
-            <label className="label-eyebrow mb-1.5 block">Email</label>
-            <input
-              type="email"
-              required
-              className="input-field"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="you@studio.com"
-            />
-          </div>
-          <div>
-            <label className="label-eyebrow mb-1.5 block">Password</label>
-            <input
-              type="password"
-              required
-              minLength={8}
-              className="input-field"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="At least 8 characters"
-            />
-          </div>
-          <button type="submit" disabled={loading} className="btn-primary w-full">
-            {loading ? <Spinner /> : 'Create account'}
-          </button>
-        </form>
+
+          <form onSubmit={onSubmit} className="space-y-4">
+            <div>
+              <label className="label-eyebrow mb-1.5 block">Name</label>
+              <input required className="input-field" value={name} onChange={(e) => setName(e.target.value)} placeholder="Ada Creator" />
+            </div>
+            <div>
+              <label className="label-eyebrow mb-1.5 block">Email</label>
+              <input
+                type="email"
+                required
+                className="input-field"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="you@studio.com"
+              />
+            </div>
+            <div>
+              <label className="label-eyebrow mb-1.5 block">Password</label>
+              <input
+                type="password"
+                required
+                minLength={8}
+                className="input-field"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="At least 8 characters"
+              />
+            </div>
+            <button type="submit" disabled={loading} className="btn-primary w-full">
+              {loading ? <Spinner /> : 'Create account'}
+            </button>
+            <p className="text-center text-[11px] leading-relaxed text-ink-faint">
+              By creating an account you agree to our{' '}
+              <Link to="/terms" className="text-ink-muted hover:text-ink">
+                Terms
+              </Link>{' '}
+              and{' '}
+              <Link to="/privacy" className="text-ink-muted hover:text-ink">
+                Privacy Policy
+              </Link>
+              .
+            </p>
+          </form>
+        </div>
 
         <p className="mt-6 text-center text-sm text-ink-muted">
           Already have an account?{' '}

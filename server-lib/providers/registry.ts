@@ -2,6 +2,7 @@ import { env } from '../config/env';
 import { GroqScriptProvider } from './script/groqProvider';
 import { NvidiaReasoningScriptProvider } from './script/nvidiaReasoningProvider';
 import { NvidiaFluxProvider } from './image/fluxProvider';
+import { NanoBananaProvider } from './image/nanoBananaProvider';
 import { NvidiaChatterboxProvider } from './voice/chatterboxProvider';
 import { ImageProvider, ScriptProvider, VoiceProvider } from './types';
 
@@ -63,4 +64,5 @@ providerRegistry.registerScriptProvider(new NvidiaReasoningScriptProvider('nvidi
 providerRegistry.registerScriptProvider(new NvidiaReasoningScriptProvider('nvidia-premium', env.nvidia.scriptModelPremium));
 providerRegistry.registerScriptProvider(new GroqScriptProvider());
 providerRegistry.registerImageProvider(new NvidiaFluxProvider());
+providerRegistry.registerImageProvider(new NanoBananaProvider());
 providerRegistry.registerVoiceProvider(new NvidiaChatterboxProvider());

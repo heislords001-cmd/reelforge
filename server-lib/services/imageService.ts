@@ -8,8 +8,8 @@ import { projectService } from './projectService';
 import { storageService } from './storageService';
 import { subscriptionService } from './subscriptionService';
 
-async function generateAndStore(scene: Scene, style?: string): Promise<SceneImage> {
-  const provider = providerRegistry.getImageProvider();
+async function generateAndStore(scene: Scene, providerName: string, style?: string): Promise<SceneImage> {
+  const provider = providerRegistry.getImageProvider(providerName);
   const result = await provider.generateImage({ prompt: scene.image_prompt, style, aspectRatio: '16:9' });
   const uploaded = await storageService.uploadImage(result.buffer, result.contentType);
 
@@ -23,14 +23,16 @@ async function generateAndStore(scene: Scene, style?: string): Promise<SceneImag
   const { rows } = await query<SceneImage>(
     `INSERT INTO scene_images (scene_id, url, storage_key, provider, model, is_selected)
      VALUES ($1, $2, $3, $4, $5, true) RETURNING *`,
-    [scene.id, uploaded.url, uploaded.storageKey, provider.name, 'flux.1-schnell']
+    [scene.id, uploaded.url, uploaded.storageKey, provider.name, provider.model]
   );
   return rows[0];
 }
 
 export const imageService = {
-  /** Generates images for every scene. 1 per scene on free, multiple to choose from on
-   *  premium. Same model either way (see env.ts for why); premium's value-add is variety. */
+  /** Generates images for every scene. Free tier gets FLUX Schnell, 1 image per scene.
+   *  Premium gets Nano Banana, a genuinely stronger paid model, with multiple variants to
+   *  choose from per scene. Both the model and the variant count are real premium value now,
+   *  not just "more of the same" like before a commercially licensed premium model existed. */
   async generateAll(projectId: string, userId: string) {
     const project = await projectService.getOwned(projectId, userId);
     const { rows: scenes } = await query<Scene>(
@@ -44,26 +46,26 @@ export const imageService = {
     const planFields = await subscriptionService.getPlanFields(userId).catch(() => {
       throw ApiError.notFound('User not found');
     });
-    const variantsPerScene = subscriptionService.isPremiumActive(planFields)
-      ? env.imagesPerScenePremium
-      : env.imagesPerSceneFree;
+    const isPremium = subscriptionService.isPremiumActive(planFields);
+    const providerName = subscriptionService.imageProviderNameFor(planFields);
+    const variantsPerScene = isPremium ? env.imagesPerScenePremium : env.imagesPerSceneFree;
 
     const jobRes = await query<{ id: string }>(
       `INSERT INTO generation_jobs (project_id, job_type, provider, status) VALUES ($1, 'image', $2, 'running') RETURNING id`,
-      [projectId, providerRegistry.getImageProvider().name]
+      [projectId, providerName]
     );
     const jobId = jobRes.rows[0].id;
 
     try {
       // Flatten (scene × variant) into one task list so concurrency is capped globally at 3
       // in-flight requests regardless of scene count or variants-per-scene. Keeps this
-      // predictable under NVIDIA's free-tier rate limits either way.
+      // predictable under rate limits either way.
       const tasks: Scene[] = [];
       for (const scene of scenes) {
         for (let i = 0; i < variantsPerScene; i++) tasks.push(scene);
       }
 
-      await mapWithConcurrency(tasks, 3, (scene) => generateAndStore(scene, project.settings.imageStyle));
+      await mapWithConcurrency(tasks, 3, (scene) => generateAndStore(scene, providerName, project.settings.imageStyle));
       await projectService.updateStatus(projectId, 'images_ready');
       await query(`UPDATE generation_jobs SET status = 'succeeded', finished_at = now() WHERE id = $1`, [jobId]);
     } catch (err) {
@@ -78,8 +80,8 @@ export const imageService = {
     return projectService.getFullProject(projectId, userId);
   },
 
-  /** Regenerates a single scene's image (user clicked "regenerate" on one card). Always
-   *  produces exactly one new variant regardless of tier, a targeted single-image action. */
+  /** Regenerates a single scene's image, always exactly one new variant, using whichever
+   *  tier the user currently has, same as generateAll. */
   async regenerateOne(sceneId: string, projectId: string, userId: string) {
     const project = await projectService.getOwned(projectId, userId);
     const { rows } = await query<Scene>('SELECT * FROM scenes WHERE id = $1 AND project_id = $2', [
@@ -89,7 +91,12 @@ export const imageService = {
     const scene = rows[0];
     if (!scene) throw ApiError.notFound('Scene not found');
 
-    const image = await generateAndStore(scene, project.settings.imageStyle);
+    const planFields = await subscriptionService.getPlanFields(userId).catch(() => {
+      throw ApiError.notFound('User not found');
+    });
+    const providerName = subscriptionService.imageProviderNameFor(planFields);
+
+    const image = await generateAndStore(scene, providerName, project.settings.imageStyle);
     return image;
   },
 

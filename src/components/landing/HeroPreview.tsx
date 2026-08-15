@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Film, ImageIcon, Mic2, RotateCcw, Wand2 } from 'lucide-react';
 import clsx from 'clsx';
 
@@ -11,10 +11,22 @@ const OUTPUTS: { id: OutputType; label: string; hint: string; icon: typeof Film 
   { id: 'everything', label: 'Everything', hint: 'Full package at once', icon: Wand2 },
 ];
 
-const DEFAULT_OUTPUT: OutputType = 'voice';
+const DEFAULT_INDEX = OUTPUTS.findIndex((o) => o.id === 'voice');
+const CYCLE_MS = 3600;
 
 export function HeroPreview() {
-  const [selected, setSelected] = useState<OutputType>(DEFAULT_OUTPUT);
+  const [index, setIndex] = useState(DEFAULT_INDEX);
+  const selected = OUTPUTS[index].id;
+
+  // The widget advances on its own, this is a landing page demo meant to be watched, not
+  // something a visitor has to operate. Clicking a card still jumps straight to it, the
+  // cycle just keeps going afterward rather than requiring anyone to drive it by hand.
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setIndex((i) => (i + 1) % OUTPUTS.length);
+    }, CYCLE_MS);
+    return () => clearInterval(interval);
+  }, []);
 
   return (
     <div className="relative mx-auto mt-14 max-w-2xl text-left">
@@ -37,20 +49,36 @@ export function HeroPreview() {
             <span className="text-xs font-medium text-ink">Live preview</span>
           </div>
           <button
-            onClick={() => setSelected(DEFAULT_OUTPUT)}
+            onClick={() => setIndex(DEFAULT_INDEX)}
             className="flex items-center gap-1 text-xs text-ink-faint transition-colors hover:text-ink"
           >
             <RotateCcw size={11} /> Reset
           </button>
         </div>
 
+        {/* Progress segments, one per output, showing the cycle actually advancing on its own */}
+        <div className="flex gap-1.5 px-5 pt-3.5">
+          {OUTPUTS.map((output, i) => (
+            <div key={output.id} className="h-[3px] flex-1 overflow-hidden rounded-full bg-white/[0.08]">
+              <div
+                className={clsx(
+                  'h-full rounded-full bg-signal-400',
+                  i < index && 'w-full',
+                  i > index && 'w-0'
+                )}
+                style={i === index ? { animation: `fill-segment ${CYCLE_MS}ms linear forwards` } : undefined}
+              />
+            </div>
+          ))}
+        </div>
+
         <div className="p-5">
           <p className="label-eyebrow mb-3">Pick what to generate</p>
           <div className="grid grid-cols-2 gap-2.5">
-            {OUTPUTS.map((output) => (
+            {OUTPUTS.map((output, i) => (
               <button
                 key={output.id}
-                onClick={() => setSelected(output.id)}
+                onClick={() => setIndex(i)}
                 className={clsx(
                   'rounded-xl border p-3 text-left transition-colors',
                   selected === output.id
@@ -68,7 +96,7 @@ export function HeroPreview() {
           </div>
 
           <div className="mt-4 min-h-[104px] rounded-xl border border-white/[0.06] bg-white/[0.02] p-4">
-            <OutputPreview selected={selected} />
+            <OutputPreview key={selected} selected={selected} />
           </div>
         </div>
       </div>

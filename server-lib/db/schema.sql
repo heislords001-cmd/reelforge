@@ -2,7 +2,7 @@
 -- Design notes:
 --   * UUID primary keys throughout so future federation / API access is painless.
 --   * `projects.status` tracks pipeline progress so the UI can resume a partial generation.
---   * `scenes` is the join between script and media — one row per beat, holding both the
+--   * `scenes` is the join between script and media. One row per beat, holding both the
 --     image and (eventually) video/subtitle rows that belong to it, keeping generation
 --     modules decoupled from each other.
 --   * `generation_jobs` gives every provider call an audit trail (cost, latency, retries)
@@ -13,7 +13,8 @@ CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 CREATE TABLE IF NOT EXISTS users (
   id              UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   email           TEXT NOT NULL UNIQUE,
-  password_hash   TEXT NOT NULL,
+  password_hash   TEXT,
+  google_id       TEXT UNIQUE,
   name            TEXT NOT NULL,
   avatar_url      TEXT,
   -- Billing: every user starts on a trial that behaves exactly like premium (full model
@@ -25,10 +26,14 @@ CREATE TABLE IF NOT EXISTS users (
   updated_at      TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
--- Safe to re-run against a database created before billing existed — adds the columns
+-- Safe to re-run against a database created before billing existed, adds the columns
 -- without touching existing rows' other data. New users get the defaults above regardless.
 ALTER TABLE users ADD COLUMN IF NOT EXISTS plan TEXT NOT NULL DEFAULT 'trial';
 ALTER TABLE users ADD COLUMN IF NOT EXISTS trial_ends_at TIMESTAMPTZ NOT NULL DEFAULT (now() + interval '30 days');
+
+-- Safe to re-run against a database created before Google sign in existed.
+ALTER TABLE users ADD COLUMN IF NOT EXISTS google_id TEXT UNIQUE;
+ALTER TABLE users ALTER COLUMN password_hash DROP NOT NULL;
 
 CREATE TABLE IF NOT EXISTS subscriptions (
   id                  UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
@@ -46,7 +51,7 @@ CREATE TABLE IF NOT EXISTS subscriptions (
 
 CREATE INDEX IF NOT EXISTS idx_subscriptions_user_id ON subscriptions(user_id);
 
--- Paystack retries webhooks that don't return 200 fast enough — this table makes handling
+-- Paystack retries webhooks that don't return 200 fast enough. This table makes handling
 -- idempotent so a retried "charge.success" doesn't double-process.
 CREATE TABLE IF NOT EXISTS payment_events (
   id              UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
@@ -135,7 +140,7 @@ CREATE TABLE IF NOT EXISTS voice_tracks (
 
 CREATE INDEX IF NOT EXISTS idx_voice_tracks_project_id ON voice_tracks(project_id);
 
--- Audit trail for every provider call — cost/latency tracking, retries, debugging.
+-- Audit trail for every provider call. Cost/latency tracking, retries, debugging.
 CREATE TABLE IF NOT EXISTS generation_jobs (
   id              UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   project_id      UUID NOT NULL REFERENCES projects(id) ON DELETE CASCADE,
@@ -150,7 +155,7 @@ CREATE TABLE IF NOT EXISTS generation_jobs (
 
 CREATE INDEX IF NOT EXISTS idx_generation_jobs_project_id ON generation_jobs(project_id);
 
--- Reserved for the "Team collaboration" roadmap item — not wired into routes yet,
+-- Reserved for the "Team collaboration" roadmap item. Not wired into routes yet,
 -- but present so that adding it later is additive, not a migration on live data.
 CREATE TABLE IF NOT EXISTS organizations (
   id              UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
