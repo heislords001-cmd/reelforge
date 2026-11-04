@@ -4,7 +4,8 @@ import { NvidiaReasoningScriptProvider } from './script/nvidiaReasoningProvider'
 import { NvidiaFluxProvider } from './image/fluxProvider';
 import { NanoBananaProvider } from './image/nanoBananaProvider';
 import { NvidiaChatterboxProvider } from './voice/chatterboxProvider';
-import { ImageProvider, ScriptProvider, VoiceProvider } from './types';
+import { GeminiVideoAnalysisProvider } from './video/geminiVideoProvider';
+import { ImageProvider, ScriptProvider, VideoAnalysisProvider, VoiceProvider } from './types';
 
 /**
  * The provider registry is the ONLY file in the codebase that imports a concrete vendor
@@ -22,10 +23,12 @@ class ProviderRegistry {
   private scriptProviders = new Map<string, ScriptProvider>();
   private imageProviders = new Map<string, ImageProvider>();
   private voiceProviders = new Map<string, VoiceProvider>();
+  private videoAnalysisProviders = new Map<string, VideoAnalysisProvider>();
 
   private defaultScript = 'nvidia-free';
   private defaultImage = 'nvidia-flux-schnell';
   private defaultVoice = 'nvidia-chatterbox';
+  private defaultVideoAnalysis = 'gemini-video';
 
   registerScriptProvider(provider: ScriptProvider) {
     this.scriptProviders.set(provider.name, provider);
@@ -35,6 +38,16 @@ class ProviderRegistry {
   }
   registerVoiceProvider(provider: VoiceProvider) {
     this.voiceProviders.set(provider.name, provider);
+  }
+
+  registerVideoAnalysisProvider(provider: VideoAnalysisProvider) {
+    this.videoAnalysisProviders.set(provider.name, provider);
+  }
+
+  getVideoAnalysisProvider(name = this.defaultVideoAnalysis): VideoAnalysisProvider {
+    const provider = this.videoAnalysisProviders.get(name);
+    if (!provider) throw new Error(`No video analysis provider registered under "${name}"`);
+    return provider;
   }
 
   getScriptProvider(name = this.defaultScript): ScriptProvider {
@@ -66,3 +79,4 @@ providerRegistry.registerScriptProvider(new GroqScriptProvider());
 providerRegistry.registerImageProvider(new NvidiaFluxProvider());
 providerRegistry.registerImageProvider(new NanoBananaProvider());
 providerRegistry.registerVoiceProvider(new NvidiaChatterboxProvider());
+providerRegistry.registerVideoAnalysisProvider(new GeminiVideoAnalysisProvider());

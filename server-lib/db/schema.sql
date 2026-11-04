@@ -1,4 +1,4 @@
--- Reelforge schema
+-- Reelbolt schema
 -- Design notes:
 --   * UUID primary keys throughout so future federation / API access is painless.
 --   * `projects.status` tracks pipeline progress so the UI can resume a partial generation.

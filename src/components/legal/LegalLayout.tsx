@@ -11,7 +11,7 @@ export function LegalLayout({ title, updated, children }: PropsWithChildren<{ ti
             <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-signal-gradient">
               <Clapperboard className="text-white" size={18} />
             </span>
-            <span className="font-display text-[15px] font-semibold tracking-tight">Reelforge</span>
+            <span className="font-display text-[15px] font-semibold tracking-tight">Reelbolt</span>
           </Link>
           <Link to="/" className="btn-ghost">
             Back home
@@ -29,7 +29,7 @@ export function LegalLayout({ title, updated, children }: PropsWithChildren<{ ti
 
       <footer className="border-t border-white/[0.06] px-6 py-8">
         <div className="mx-auto flex max-w-3xl items-center justify-between text-xs text-ink-faint">
-          <span>© {new Date().getFullYear()} Reelforge</span>
+          <span>© {new Date().getFullYear()} Reelbolt</span>
           <div className="flex gap-4">
             <Link to="/terms" className="hover:text-ink">
               Terms

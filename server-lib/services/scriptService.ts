@@ -29,8 +29,12 @@ export const scriptService = {
     const jobId = jobRes.rows[0].id;
 
     try {
+      const blueprint = project.settings.blueprint;
       const script = await provider.generateScript({
-        prompt: project.prompt,
+        // With a blueprint, the subject is the user's optional topic hint, or empty so the
+        // model chooses a fresh subject. project.prompt is only a display label in that case.
+        prompt: blueprint ? project.settings.topicHint ?? '' : project.prompt,
+        blueprint,
         targetLengthMinutes: project.settings.targetLengthMinutes,
         tone: project.settings.tone,
       });

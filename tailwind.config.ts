@@ -7,28 +7,28 @@ export default {
     extend: {
       colors: {
         base: {
-          DEFAULT: '#08080C',
-          surface: '#111118',
-          elevated: '#16161F',
+          DEFAULT: '#050505',
+          surface: '#0D0D0D',
+          elevated: '#131313',
           border: 'rgba(255,255,255,0.08)',
         },
         ink: {
-          DEFAULT: '#F3F3F6',
-          muted: '#9C9BA8',
-          faint: '#6B6A76',
+          DEFAULT: '#F5F5F5',
+          muted: '#8A8A8A',
+          faint: '#555555',
         },
         signal: {
-          50: '#F1EEFF',
-          200: '#C7BBFF',
-          400: '#9C86FF',
-          500: '#7C5CFF',
-          600: '#6540F0',
-          700: '#4F2ED1',
+          50: '#F6ECFF',
+          200: '#E0B3FF',
+          400: '#C77DFF',
+          500: '#B14AFF',
+          600: '#9333EA',
+          700: '#7E22CE',
         },
         ember: {
-          400: '#FF9D6C',
-          500: '#FF8A5B',
-          600: '#F2703C',
+          400: '#FF6EC7',
+          500: '#FF2E9A',
+          600: '#E0157A',
         },
         success: '#34D399',
       },
@@ -38,11 +38,11 @@ export default {
         mono: ['"IBM Plex Mono"', 'ui-monospace', 'monospace'],
       },
       backgroundImage: {
-        'signal-gradient': 'linear-gradient(135deg, #7C5CFF 0%, #FF8A5B 100%)',
-        'aurora': 'radial-gradient(45% 45% at 50% -5%, rgba(255,255,255,0.06) 0%, rgba(8,8,12,0) 60%), radial-gradient(60% 60% at 20% 0%, rgba(124,92,255,0.20) 0%, rgba(8,8,12,0) 60%), radial-gradient(50% 50% at 90% 10%, rgba(255,138,91,0.14) 0%, rgba(8,8,12,0) 60%)',
+        'signal-gradient': 'linear-gradient(135deg, #B14AFF 0%, #FF2E9A 100%)',
+        'aurora': 'radial-gradient(45% 35% at 50% -5%, rgba(177,74,255,0.16) 0%, rgba(5,5,5,0) 60%), radial-gradient(40% 40% at 90% 0%, rgba(255,46,154,0.12) 0%, rgba(5,5,5,0) 60%)',
       },
       boxShadow: {
-        glow: '0 0 0 1px rgba(124,92,255,0.4), 0 8px 40px -8px rgba(124,92,255,0.45)',
+        glow: '0 0 0 1px rgba(177,74,255,0.4), 0 8px 40px -8px rgba(177,74,255,0.5)',
         card: '0 1px 0 rgba(255,255,255,0.04) inset, 0 20px 40px -20px rgba(0,0,0,0.6)',
       },
       borderRadius: {

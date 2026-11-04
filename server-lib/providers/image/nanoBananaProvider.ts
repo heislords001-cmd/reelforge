@@ -24,7 +24,12 @@ export class NanoBananaProvider implements ImageProvider {
     }
 
     const styleSuffix = input.style ? STYLE_PRESETS[input.style] ?? input.style : STYLE_PRESETS.documentary;
-    const aspectHint = input.aspectRatio === '9:16' ? 'vertical 9:16 portrait frame' : 'widescreen 16:9 frame';
+    const aspectHint =
+      input.aspectRatio === '9:16'
+        ? 'vertical 9:16 portrait frame'
+        : input.aspectRatio === '1:1'
+          ? 'square 1:1 frame'
+          : 'widescreen 16:9 frame';
     // Aspect ratio is conveyed through the prompt itself rather than a dedicated config
     // field. Nano Banana 2 does support native aspect ratios through its own image config,
     // but the exact field name varies across SDK versions, and a text hint works reliably

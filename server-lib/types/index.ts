@@ -42,7 +42,34 @@ export interface Project {
   updated_at: string;
 }
 
+/**
+ * What a scan of a source video produces. It describes the STORYLINE PATTERN only (how the
+ * video opens, escalates, resolves, and holds attention), never the video's own wording or
+ * facts, so new scripts can follow the shape without reproducing the content.
+ */
+export interface VideoBlueprint {
+  niche: string;
+  audience: string;
+  estimatedLengthMinutes: number;
+  tone: string;
+  hookStyle: string;
+  narrativeArc: string;
+  structure: { beat: string; purpose: string; approxShare: number }[];
+  retentionTechniques: string[];
+  emotionalBeats: string[];
+  titlePattern: string;
+}
+
+export const IMAGE_STYLES = ['documentary', 'cinematic', 'historical', 'animated'] as const;
+export const ASPECT_RATIOS = ['16:9', '9:16', '1:1'] as const;
+export type AspectRatio = (typeof ASPECT_RATIOS)[number];
+
 export interface ProjectSettings {
+  aspectRatio?: AspectRatio;
+  blueprint?: VideoBlueprint;
+  sourceVideoUrl?: string;
+  /** Optional subject the user wants the new story to be about. */
+  topicHint?: string;
   targetLengthMinutes?: number;
   tone?: string;
   voiceCategory?: VoiceCategory;

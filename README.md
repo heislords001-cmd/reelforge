@@ -1,4 +1,4 @@
-# Reelforge: AI YouTube Content Studio
+# Reelbolt: AI YouTube Content Studio
 
 Turn one idea into a finished video package: script, scene-by-scene images, and human-like
 narration. Built as a **single deployable project**. One repo, one Vercel project, one
@@ -134,6 +134,31 @@ Free tier stays on FLUX Schnell regardless, both for cost and because FLUX Dev (
 FLUX tier) turned out to be licensed for non-commercial use only on NVIDIA's hosting, not
 something to build a paid product on. Nano Banana solved that same problem with an actually
 commercial, paid API instead.
+
+## Home studio
+
+Home is a two panel studio: a preview on the left, controls on the right. Pick a start mode
+(from an idea, or from a video link), then aspect ratio (16:9, 9:16, 1:1), length and image
+style. Those choices are saved on the project (`projects.settings`) and used for real:
+aspect ratio and style shape every generated image, length steers the script. The preview
+frame is an example, it reshapes to the chosen ratio but is not real output.
+
+## Video link scanning
+
+Home has two modes: start from an idea, or paste a public YouTube link. In link mode the
+video is read by Gemini (`server-lib/providers/video/geminiVideoProvider.ts`), which returns
+a storyline blueprint: niche, tone, hook style, narrative arc, beat by beat structure,
+retention techniques. It deliberately returns patterns, never the video's wording or facts.
+
+That blueprint is stored on the project and handed to the normal script generator
+(`server-lib/providers/script/promptBuilder.ts`), which is told to write a completely
+different story with a new subject in the same shape. From there it is the regular
+Script, Video and Audio flow. An optional topic hint lets the user choose the new subject.
+
+Two requests on purpose: `POST /api/generate/from-video` scans and creates the project, then
+the client calls the normal script route. Each stays inside serverless time limits. Very
+long videos may still be slow to scan, and only public videos work. Uses the same
+`GOOGLE_GEMINI_API_KEY` as Nano Banana plus `GOOGLE_GEMINI_ANALYSIS_MODEL`.
 
 ## Billing (trial → premium)
 

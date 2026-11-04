@@ -6,7 +6,8 @@ import { scriptService } from '../services/scriptService';
 import { imageService } from '../services/imageService';
 import { voiceService } from '../services/voiceService';
 import { projectService } from '../services/projectService';
-import { DEFAULT_VOICE_CONTROLS, VOICE_CATEGORIES } from '../types';
+import { providerRegistry } from '../providers/registry';
+import { ASPECT_RATIOS, DEFAULT_VOICE_CONTROLS, IMAGE_STYLES, VOICE_CATEGORIES } from '../types';
 import { ApiError } from '../utils/ApiError';
 
 export const generateRouter = Router();
@@ -24,6 +25,54 @@ const voiceSchema = z.object({
     .partial()
     .optional(),
 });
+
+// POST /api/generate/from-video. Scans a public YouTube video for its storyline pattern and
+// creates a project that will write a different, original story in that same shape. Only the
+// scan happens here. Writing the script is a second request from the client, so each request
+// stays under serverless time limits. Sits under /generate so it gets the tighter rate limit.
+const YOUTUBE_HOSTS = ['youtube.com', 'www.youtube.com', 'm.youtube.com', 'youtu.be'];
+const fromVideoSchema = z.object({
+  url: z
+    .string()
+    .url()
+    .refine((value) => {
+      try {
+        return YOUTUBE_HOSTS.includes(new URL(value).hostname);
+      } catch {
+        return false;
+      }
+    }, 'Paste a public YouTube link'),
+  topicHint: z.string().trim().max(300).optional(),
+  targetLengthMinutes: z.number().min(1).max(60).optional(),
+  imageStyle: z.enum(IMAGE_STYLES).optional(),
+  aspectRatio: z.enum(ASPECT_RATIOS).optional(),
+});
+
+generateRouter.post(
+  '/from-video',
+  asyncHandler(async (req, res) => {
+    const parsed = fromVideoSchema.safeParse(req.body);
+    if (!parsed.success) throw ApiError.badRequest('Paste a public YouTube link', parsed.error.flatten());
+
+    const blueprint = await providerRegistry.getVideoAnalysisProvider().analyzeVideo(parsed.data.url);
+    const topicHint = parsed.data.topicHint || undefined;
+
+    const project = await projectService.create(
+      req.user!.userId,
+      topicHint ?? `An original ${blueprint.niche} story`,
+      {
+        blueprint,
+        sourceVideoUrl: parsed.data.url,
+        topicHint,
+        tone: blueprint.tone,
+        targetLengthMinutes: parsed.data.targetLengthMinutes,
+        imageStyle: parsed.data.imageStyle,
+        aspectRatio: parsed.data.aspectRatio,
+      }
+    );
+    res.status(201).json({ project });
+  })
+);
 
 // POST /api/generate/:projectId/script
 generateRouter.post(

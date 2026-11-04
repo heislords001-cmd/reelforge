@@ -1,16 +1,21 @@
 import { env } from '../config/env';
 import { query } from '../config/database';
 import { providerRegistry } from '../providers/registry';
-import { Scene, SceneImage } from '../types';
+import { AspectRatio, Scene, SceneImage } from '../types';
 import { ApiError } from '../utils/ApiError';
 import { mapWithConcurrency } from '../utils/concurrency';
 import { projectService } from './projectService';
 import { storageService } from './storageService';
 import { subscriptionService } from './subscriptionService';
 
-async function generateAndStore(scene: Scene, providerName: string, style?: string): Promise<SceneImage> {
+async function generateAndStore(
+  scene: Scene,
+  providerName: string,
+  style?: string,
+  aspectRatio: AspectRatio = '16:9'
+): Promise<SceneImage> {
   const provider = providerRegistry.getImageProvider(providerName);
-  const result = await provider.generateImage({ prompt: scene.image_prompt, style, aspectRatio: '16:9' });
+  const result = await provider.generateImage({ prompt: scene.image_prompt, style, aspectRatio });
   const uploaded = await storageService.uploadImage(result.buffer, result.contentType);
 
   // Deselect previous images for this scene so exactly one stays "active". When called
@@ -65,7 +70,7 @@ export const imageService = {
         for (let i = 0; i < variantsPerScene; i++) tasks.push(scene);
       }
 
-      await mapWithConcurrency(tasks, 3, (scene) => generateAndStore(scene, providerName, project.settings.imageStyle));
+      await mapWithConcurrency(tasks, 3, (scene) => generateAndStore(scene, providerName, project.settings.imageStyle, project.settings.aspectRatio));
       await projectService.updateStatus(projectId, 'images_ready');
       await query(`UPDATE generation_jobs SET status = 'succeeded', finished_at = now() WHERE id = $1`, [jobId]);
     } catch (err) {
@@ -96,7 +101,7 @@ export const imageService = {
     });
     const providerName = subscriptionService.imageProviderNameFor(planFields);
 
-    const image = await generateAndStore(scene, providerName, project.settings.imageStyle);
+    const image = await generateAndStore(scene, providerName, project.settings.imageStyle, project.settings.aspectRatio);
     return image;
   },
 

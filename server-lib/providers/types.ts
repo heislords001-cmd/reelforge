@@ -1,4 +1,4 @@
-import { GeneratedScript, VoiceCategory, VoiceControls } from '../types';
+import { GeneratedScript, VideoBlueprint, VoiceCategory, VoiceControls } from '../types';
 
 /**
  * Every AI capability in the platform is defined here as a small, stable interface.
@@ -8,7 +8,10 @@ import { GeneratedScript, VoiceCategory, VoiceControls } from '../types';
  */
 
 export interface ScriptGenerationInput {
+  /** The subject. May be empty when a blueprint is given and the model should pick a fresh one. */
   prompt: string;
+  /** When present, write an original story that follows this storyline pattern. */
+  blueprint?: VideoBlueprint;
   targetLengthMinutes?: number;
   tone?: string;
 }
@@ -52,4 +55,11 @@ export interface VoiceSynthesisResult {
 export interface VoiceProvider {
   readonly name: string;
   synthesize(input: VoiceSynthesisInput): Promise<VoiceSynthesisResult>;
+}
+
+export interface VideoAnalysisProvider {
+  readonly name: string;
+  readonly model: string;
+  /** Watches a public video and returns its storyline pattern, never its wording. */
+  analyzeVideo(url: string): Promise<VideoBlueprint>;
 }

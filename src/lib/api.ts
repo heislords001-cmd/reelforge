@@ -1,10 +1,18 @@
 import axios from 'axios';
-import { BillingStatus, FullProject, Project, User, VoiceCategory, VoiceControls } from './types';
+import { AspectRatio, BillingStatus, FullProject, Project, User, VoiceCategory, VoiceControls } from './types';
 
 // Always relative: in production this project serves both the static site and /api/* from
 // the same Vercel deployment, so "/api" just resolves. In local dev, vite.config.ts proxies
 // "/api" to the standalone Express server on :4000. Either way, no env var to keep in sync.
 export const http = axios.create({ baseURL: '/api' });
+
+/** Creation settings chosen on Home. All optional, the server has sensible defaults. */
+export interface ProjectOptions {
+  targetLengthMinutes?: number;
+  tone?: string;
+  imageStyle?: string;
+  aspectRatio?: AspectRatio;
+}
 
 http.interceptors.request.use((config) => {
   const token = localStorage.getItem('reelforge_token');
@@ -53,8 +61,8 @@ export const api = {
       const { data } = await http.get<{ projects: Project[] }>('/projects', { params: { search } });
       return data.projects;
     },
-    async create(prompt: string, targetLengthMinutes?: number, tone?: string) {
-      const { data } = await http.post<{ project: Project }>('/projects', { prompt, targetLengthMinutes, tone });
+    async create(prompt: string, options: ProjectOptions = {}) {
+      const { data } = await http.post<{ project: Project }>('/projects', { prompt, ...options });
       return data.project;
     },
     async get(id: string) {
@@ -85,6 +93,12 @@ export const api = {
     async images(projectId: string) {
       const { data } = await http.post<FullProject>(`/generate/${projectId}/images`);
       return data;
+    },
+    /** Scans a public YouTube video for its storyline pattern and creates a project that
+     *  writes a different, original story in that shape. Writing the script is a separate call. */
+    async fromVideo(url: string, options: ProjectOptions & { topicHint?: string } = {}) {
+      const { data } = await http.post<{ project: Project }>('/generate/from-video', { url, ...options });
+      return data.project;
     },
     async regenerateImage(projectId: string, sceneId: string) {
       const { data } = await http.post(`/generate/${projectId}/images/${sceneId}/regenerate`);

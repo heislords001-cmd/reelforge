@@ -3,6 +3,7 @@ import { GeneratedScript } from '../../types';
 import { ApiError } from '../../utils/ApiError';
 import { withRetry } from '../../utils/retry';
 import { ScriptGenerationInput, ScriptProvider } from '../types';
+import { buildScriptUserPrompt } from './promptBuilder';
 
 const GROQ_ENDPOINT = 'https://api.groq.com/openai/v1/chat/completions';
 
@@ -34,13 +35,7 @@ export class GroqScriptProvider implements ScriptProvider {
       throw ApiError.internal('GROQ_API_KEY is not configured on the server');
     }
 
-    const userPrompt = [
-      `Video idea: "${input.prompt}"`,
-      input.targetLengthMinutes ? `Target length: ~${input.targetLengthMinutes} minutes` : null,
-      input.tone ? `Tone: ${input.tone}` : null,
-    ]
-      .filter(Boolean)
-      .join('\n');
+    const userPrompt = buildScriptUserPrompt(input);
 
     const raw = await withRetry(
       async () => {

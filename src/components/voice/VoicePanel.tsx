@@ -1,7 +1,15 @@
-import { useState } from 'react';
-import { Play, Wand2 } from 'lucide-react';
-import { DEFAULT_VOICE_CONTROLS, Scene, VOICE_CATEGORIES, VoiceCategory, VoiceControls, VoiceTrack } from '../../lib/types';
-import { api } from '../../lib/api';
+import { useEffect, useState } from 'react';
+import { Lock, Play, Wand2 } from 'lucide-react';
+import {
+  DEFAULT_VOICE_CONTROLS,
+  PREMIUM_VOICE_CATEGORIES,
+  Scene,
+  VOICE_CATEGORIES,
+  VoiceCategory,
+  VoiceControls,
+  VoiceTrack,
+} from '../../lib/types';
+import { api, errorMessage } from '../../lib/api';
 import { Spinner } from '../ui/Primitives';
 
 interface Props {
@@ -17,14 +25,33 @@ export function VoicePanel({ projectId, scenes, voiceTracks, onChanged }: Props)
   );
   const [controls, setControls] = useState<VoiceControls>(voiceTracks[0]?.settings ?? DEFAULT_VOICE_CONTROLS);
   const [generating, setGenerating] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  // null until billing loads. Nothing is locked while it is unknown, the server enforces
+  // the real rule either way, this only decides what the UI shows up front.
+  const [premium, setPremium] = useState<boolean | null>(null);
+
+  useEffect(() => {
+    api.billing.status().then((s) => setPremium(s.isPremiumActive)).catch(() => {});
+  }, []);
+
+  const isLocked = (id: VoiceCategory) => premium === false && PREMIUM_VOICE_CATEGORIES.includes(id);
+
+  // A project voiced during the trial may use a premium style. Once the trial ends, fall
+  // back to a free one rather than letting the next generate fail.
+  useEffect(() => {
+    if (premium === false && PREMIUM_VOICE_CATEGORIES.includes(category)) setCategory('documentary_male');
+  }, [premium, category]);
 
   const tracksByScene = new Map(voiceTracks.map((t) => [t.scene_id, t]));
 
   async function generate() {
+    setError(null);
     setGenerating(true);
     try {
       await api.generate.voice(projectId, category, controls);
       onChanged();
+    } catch (err) {
+      setError(errorMessage(err, 'Could not generate narration. Please try again.'));
     } finally {
       setGenerating(false);
     }
@@ -38,13 +65,21 @@ export function VoicePanel({ projectId, scenes, voiceTracks, onChanged }: Props)
           {VOICE_CATEGORIES.map((v) => (
             <button
               key={v.id}
-              onClick={() => setCategory(v.id)}
-              className={`rounded-xl border p-3 text-left transition-colors ${
+              onClick={() => {
+                if (isLocked(v.id)) {
+                  setError('That voice is part of Premium. Pick one of the free styles, or upgrade to unlock it.');
+                  return;
+                }
+                setError(null);
+                setCategory(v.id);
+              }}
+              className={`relative rounded-xl border p-3 text-left transition-colors ${
                 category === v.id
                   ? 'border-signal-500/50 bg-signal-500/10'
                   : 'border-white/[0.07] bg-white/[0.02] hover:border-white/[0.15]'
-              }`}
+              } ${isLocked(v.id) ? 'opacity-55' : ''}`}
             >
+              {isLocked(v.id) && <Lock size={12} className="absolute right-2.5 top-2.5 text-ink-faint" />}
               <p className="text-xs font-semibold text-ink">{v.label}</p>
               <p className="mt-0.5 text-[11px] text-ink-muted">{v.description}</p>
             </button>
@@ -62,6 +97,7 @@ export function VoicePanel({ projectId, scenes, voiceTracks, onChanged }: Props)
           {generating ? <Spinner /> : <Wand2 size={15} />}
           Generate narration
         </button>
+        {error && <p className="mt-3 text-xs text-ember-400">{error}</p>}
       </div>
 
       {voiceTracks.length > 0 && (

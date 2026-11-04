@@ -1,7 +1,19 @@
 import { PropsWithChildren } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Clapperboard, LogOut, Sparkles } from 'lucide-react';
+import { Clapperboard, LogOut } from 'lucide-react';
 import { useAuthStore } from '../../store/authStore';
+import { User } from '../../lib/types';
+
+/**
+ * Google accounts usually carry a real profile photo (user.avatar_url). Email and password
+ * accounts, and the rare Google account with no photo set, get a generated avatar instead,
+ * seeded by the user's id so it stays the same every time rather than changing on reload.
+ * DiceBear needs no API key and returns a ready to use image URL.
+ */
+function avatarSrc(user: User): string {
+  if (user.avatar_url) return user.avatar_url;
+  return `https://api.dicebear.com/7.x/shapes/svg?seed=${encodeURIComponent(user.id)}`;
+}
 
 export function AppShell({ children }: PropsWithChildren) {
   const { user, logout } = useAuthStore();
@@ -15,14 +27,20 @@ export function AppShell({ children }: PropsWithChildren) {
             <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-signal-gradient">
               <Clapperboard className="h-4.5 w-4.5 text-white" size={18} />
             </span>
-            <span className="font-display text-[15px] font-semibold tracking-tight">Reelforge</span>
+            <span className="font-display text-[15px] font-semibold tracking-tight">Reelbolt</span>
           </Link>
 
           <div className="flex items-center gap-3">
-            <div className="hidden items-center gap-1.5 rounded-full glass px-3 py-1.5 text-xs text-ink-muted sm:flex">
-              <Sparkles size={13} className="text-signal-400" />
-              {user?.name}
-            </div>
+            {user && (
+              <div className="hidden items-center gap-2 rounded-full glass py-1 pl-1 pr-3 sm:flex">
+                <img
+                  src={avatarSrc(user)}
+                  alt={user.name}
+                  className="h-6 w-6 rounded-full border border-white/10 object-cover"
+                />
+                <span className="text-xs text-ink-muted">{user.name}</span>
+              </div>
+            )}
             <button
               className="btn-ghost"
               onClick={() => {

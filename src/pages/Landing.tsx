@@ -61,7 +61,7 @@ export default function Landing() {
             <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-signal-gradient">
               <Clapperboard className="text-white" size={18} />
             </span>
-            <span className="font-display text-[15px] font-semibold tracking-tight">Reelforge</span>
+            <span className="font-display text-[15px] font-semibold tracking-tight">Reelbolt</span>
           </div>
           <nav className="hidden items-center gap-6 text-sm text-ink-muted md:flex">
             <a href="#pipeline" className="hover:text-ink">
@@ -92,7 +92,7 @@ export default function Landing() {
             One idea becomes a <span className="bg-signal-gradient bg-clip-text text-transparent">finished video package.</span>
           </h1>
           <p className="mx-auto mt-6 max-w-xl text-base text-ink-muted sm:text-lg">
-            Type what your video is about. Reelforge drafts the script, generates scene by scene
+            Type what your video is about. Reelbolt drafts the script, generates scene by scene
             images, and narrates it in a human like voice, ready for you to edit and publish.
           </p>
 
@@ -121,7 +121,7 @@ export default function Landing() {
         <section id="pipeline" className="mx-auto max-w-6xl scroll-mt-24 px-6 pb-24">
           <div className="mb-10 text-center">
             <p className="label-eyebrow mb-2 text-signal-400">How it works</p>
-            <h2 className="text-2xl font-semibold sm:text-3xl">Three steps, one prompt.</h2>
+            <h2 className="text-2xl font-semibold sm:text-3xl">One prompt in. A finished package out.</h2>
           </div>
           <div className="grid grid-cols-1 gap-5 sm:grid-cols-3">
             {PIPELINE.map((step, i) => (
@@ -210,7 +210,7 @@ export default function Landing() {
 
       <footer className="border-t border-white/[0.06] px-6 py-8">
         <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-4 text-xs text-ink-faint sm:flex-row">
-          <span>© {new Date().getFullYear()} Reelforge</span>
+          <span>© {new Date().getFullYear()} Reelbolt</span>
           <div className="flex items-center gap-5">
             <Link to="/terms" className="hover:text-ink">
               Terms
@@ -226,7 +226,7 @@ export default function Landing() {
             <span className="flex h-5 w-5 items-center justify-center rounded bg-signal-gradient">
               <Clapperboard className="text-white" size={11} />
             </span>
-            <span>Reelforge</span>
+            <span>Reelbolt</span>
           </div>
         </div>
       </footer>

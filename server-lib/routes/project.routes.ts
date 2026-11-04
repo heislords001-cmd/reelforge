@@ -4,6 +4,7 @@ import { requireAuth } from '../middleware/auth';
 import { asyncHandler } from '../middleware/asyncHandler';
 import { projectService } from '../services/projectService';
 import { scriptService } from '../services/scriptService';
+import { ASPECT_RATIOS, IMAGE_STYLES } from '../types';
 import { ApiError } from '../utils/ApiError';
 
 export const projectRouter = Router();
@@ -13,6 +14,8 @@ const createSchema = z.object({
   prompt: z.string().min(3, 'Tell us what the video is about'),
   targetLengthMinutes: z.number().min(1).max(60).optional(),
   tone: z.string().optional(),
+  imageStyle: z.enum(IMAGE_STYLES).optional(),
+  aspectRatio: z.enum(ASPECT_RATIOS).optional(),
 });
 
 projectRouter.post(
@@ -24,6 +27,8 @@ projectRouter.post(
     const project = await projectService.create(req.user!.userId, parsed.data.prompt, {
       targetLengthMinutes: parsed.data.targetLengthMinutes,
       tone: parsed.data.tone,
+      imageStyle: parsed.data.imageStyle,
+      aspectRatio: parsed.data.aspectRatio,
     });
     res.status(201).json({ project });
   })

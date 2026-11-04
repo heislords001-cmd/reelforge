@@ -5,7 +5,7 @@ export default function Terms() {
     <LegalLayout title="Terms of Service" updated="today">
       <LegalSection title="1. Agreement">
         <p>
-          These terms govern your use of Reelforge, a platform that generates video scripts,
+          These terms govern your use of Reelbolt, a platform that generates video scripts,
           images, and voice narration from a written prompt. By creating an account, you agree
           to these terms. If you do not agree, please do not use the service.
         </p>
@@ -16,7 +16,7 @@ export default function Terms() {
           You are responsible for keeping your account credentials secure and for all activity
           that happens under your account. You must provide accurate information when you sign
           up and keep it current. You must be old enough to enter a binding agreement in your
-          country to use Reelforge.
+          country to use Reelbolt.
         </p>
       </LegalSection>
 
@@ -37,9 +37,9 @@ export default function Terms() {
 
       <LegalSection title="4. Generated content">
         <p>
-          Scripts, images, and audio you generate through Reelforge are yours to use, edit, and
+          Scripts, images, and audio you generate through Reelbolt are yours to use, edit, and
           publish, subject to the rights of any underlying AI models and to applicable law.
-          Reelforge does not claim ownership over content you generate.
+          Reelbolt does not claim ownership over content you generate.
         </p>
         <p>
           Generated content is produced by automated systems and may occasionally be
@@ -50,7 +50,7 @@ export default function Terms() {
       </LegalSection>
 
       <LegalSection title="5. Acceptable use">
-        <p>You agree not to use Reelforge to generate content that:</p>
+        <p>You agree not to use Reelbolt to generate content that:</p>
         <ul>
           <li>Is illegal, or that infringes someone else's rights</li>
           <li>Is intended to harass, defame, or deceive a specific person or group</li>
@@ -64,7 +64,7 @@ export default function Terms() {
         <p>
           Generating a script, image, or voice track involves sending your prompt and related
           data to third party AI providers for processing. Payments are handled by a third
-          party payment processor; Reelforge does not store your full card details. Generated
+          party payment processor; Reelbolt does not store your full card details. Generated
           files are stored with a third party cloud storage provider so they remain available
           in your projects.
         </p>
@@ -72,7 +72,7 @@ export default function Terms() {
 
       <LegalSection title="7. Termination">
         <p>
-          You may stop using Reelforge and delete your account at any time. We may suspend or
+          You may stop using Reelbolt and delete your account at any time. We may suspend or
           terminate an account that violates these terms, with notice where reasonably
           possible. Projects and generated content tied to a deleted account may be permanently
           removed.
@@ -81,9 +81,9 @@ export default function Terms() {
 
       <LegalSection title="8. Disclaimers and liability">
         <p>
-          Reelforge is provided as is, without warranties of any kind. We do not guarantee that
+          Reelbolt is provided as is, without warranties of any kind. We do not guarantee that
           the service will be uninterrupted, error free, or that generated content will meet
-          any particular standard. To the extent permitted by law, Reelforge is not liable for
+          any particular standard. To the extent permitted by law, Reelbolt is not liable for
           indirect, incidental, or consequential damages arising from your use of the service.
         </p>
       </LegalSection>

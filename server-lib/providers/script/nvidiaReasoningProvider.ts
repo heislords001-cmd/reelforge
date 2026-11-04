@@ -3,6 +3,7 @@ import { GeneratedScript } from '../../types';
 import { ApiError } from '../../utils/ApiError';
 import { withRetry } from '../../utils/retry';
 import { ScriptGenerationInput, ScriptProvider } from '../types';
+import { buildScriptUserPrompt } from './promptBuilder';
 
 // NVIDIA's catalog is OpenAI-compatible. Same request/response shape as Groq/OpenAI,
 // just a different base URL and model string.
@@ -41,13 +42,7 @@ export class NvidiaReasoningScriptProvider implements ScriptProvider {
       throw ApiError.internal('NVIDIA_API_KEY is not configured on the server');
     }
 
-    const userPrompt = [
-      `Video idea: "${input.prompt}"`,
-      input.targetLengthMinutes ? `Target length: ~${input.targetLengthMinutes} minutes` : null,
-      input.tone ? `Tone: ${input.tone}` : null,
-    ]
-      .filter(Boolean)
-      .join('\n');
+    const userPrompt = buildScriptUserPrompt(input);
 
     const raw = await withRetry(
       async () => {

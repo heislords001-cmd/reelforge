@@ -92,7 +92,7 @@ export default function Login() {
         </div>
 
         <p className="mt-6 text-center text-sm text-ink-muted">
-          New to Reelforge?{' '}
+          New to Reelbolt?{' '}
           <Link to="/register" className="font-medium text-signal-200 hover:text-signal-400">
             Create an account
           </Link>

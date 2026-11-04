@@ -4,7 +4,7 @@ export default function Privacy() {
   return (
     <LegalLayout title="Privacy Policy" updated="today">
       <LegalSection title="1. What we collect">
-        <p>When you use Reelforge, we collect:</p>
+        <p>When you use Reelbolt, we collect:</p>
         <ul>
           <li>Account information: your name, email address, and a securely hashed password, or your Google account identifier if you sign in with Google</li>
           <li>Content you create: prompts, generated scripts, images, and audio, and any edits you make to them</li>
@@ -67,7 +67,7 @@ export default function Privacy() {
 
       <LegalSection title="7. Children">
         <p>
-          Reelforge is not directed at children, and we do not knowingly collect personal
+          Reelbolt is not directed at children, and we do not knowingly collect personal
           information from anyone under the age required to hold an account in their country.
         </p>
       </LegalSection>

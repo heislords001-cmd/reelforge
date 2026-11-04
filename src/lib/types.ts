@@ -21,7 +21,10 @@ export interface VoiceControls {
 
 export const DEFAULT_VOICE_CONTROLS: VoiceControls = { speed: 1, pitch: 0, volume: 100, stability: 0.6 };
 
+export type AspectRatio = '16:9' | '9:16' | '1:1';
+
 export interface ProjectSettings {
+  aspectRatio?: AspectRatio;
   targetLengthMinutes?: number;
   tone?: string;
   voiceCategory?: VoiceCategory;

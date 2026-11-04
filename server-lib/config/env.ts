@@ -28,6 +28,9 @@ export const env = {
     // Separate credential, separate Google product. This is a Gemini API key from Google
     // AI Studio, used for Nano Banana image generation, not the OAuth client above.
     geminiApiKey: process.env.GOOGLE_GEMINI_API_KEY ?? '',
+    // Model used to watch and analyze source videos. Google renames these often, so it is an
+    // env var rather than something to hardcode and chase.
+    geminiAnalysisModel: process.env.GOOGLE_GEMINI_ANALYSIS_MODEL ?? 'gemini-3.8-flash',
     geminiImageModel: process.env.GOOGLE_GEMINI_IMAGE_MODEL ?? 'gemini-3.1-flash-image-preview',
   },
 
