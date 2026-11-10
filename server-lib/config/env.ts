@@ -43,6 +43,10 @@ export const env = {
     fluxModel: process.env.NVIDIA_FLUX_MODEL ?? 'black-forest-labs/flux.1-schnell',
     chatterboxModel: process.env.NVIDIA_CHATTERBOX_MODEL ?? 'nvidia/chatterbox-tts',
     // Premium tier. Stronger reasoning model, gated behind an active trial/subscription.
+    // Splits a raw pasted script into scenes with image prompts. Overridable because model
+    // names on the catalog change. Base URL is overridable so tests can point at a mock.
+    splitterModel: process.env.NVIDIA_SPLITTER_MODEL ?? 'google/gemma-4-31b-it',
+    chatBaseUrl: process.env.NVIDIA_CHAT_BASE_URL ?? 'https://integrate.api.nvidia.com/v1',
     scriptModelPremium: process.env.NVIDIA_SCRIPT_MODEL_PREMIUM ?? 'deepseek-ai/deepseek-v4-pro',
     // Free tier. Solid general-purpose model, available to everyone with no subscription.
     scriptModelFree: process.env.NVIDIA_SCRIPT_MODEL_FREE ?? 'nvidia/nemotron-3-super-120b-a12b',
@@ -63,6 +67,28 @@ export const env = {
       apiKey: process.env.CLOUDINARY_API_KEY ?? '',
       apiSecret: process.env.CLOUDINARY_API_SECRET ?? '',
     },
+  },
+
+  // Video rendering needs FFmpeg and minutes of runtime, so it only runs on a long lived
+  // container host with RENDER_ENABLED=true. Never on Vercel, see server-lib/services/renderService.ts.
+  render: {
+    enabled: process.env.RENDER_ENABLED === 'true',
+    ffmpegPath: process.env.FFMPEG_PATH ?? '',
+    ffprobePath: process.env.FFPROBE_PATH ?? '',
+    watermarkText: process.env.WATERMARK_TEXT ?? 'Made with Reelbolt',
+    watermarkFont: process.env.WATERMARK_FONT ?? '/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf',
+    maxConcurrent: Number(process.env.RENDER_MAX_CONCURRENT ?? 1),
+  },
+
+  magicHour: {
+    apiKey: process.env.MAGIC_HOUR_API_KEY ?? '',
+    baseUrl: process.env.MAGIC_HOUR_BASE_URL ?? 'https://api.magichour.ai/v1',
+    model: process.env.MAGIC_HOUR_MODEL ?? 'ltx-2.5',
+    resolution: process.env.MAGIC_HOUR_RESOLUTION ?? '480p',
+    clipSeconds: Number(process.env.MAGIC_HOUR_CLIP_SECONDS ?? 5),
+    // Per clip. Magic Hour renders typically take a few minutes.
+    timeoutMs: Number(process.env.MAGIC_HOUR_TIMEOUT_MS ?? 8 * 60 * 1000),
+    pollMs: Number(process.env.MAGIC_HOUR_POLL_MS ?? 5000),
   },
 
   paystack: {

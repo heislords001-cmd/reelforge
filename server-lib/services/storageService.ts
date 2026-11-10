@@ -72,7 +72,7 @@ class CloudinaryStorageDriver implements StorageDriver {
 
   async upload(buffer: Buffer, opts: { folder: string; contentType: string }): Promise<UploadResult> {
     const cloudinary = this.client();
-    const resourceType = opts.contentType.startsWith('audio') ? 'video' : 'image'; // Cloudinary stores audio under "video"
+    const resourceType = opts.contentType.startsWith('audio') || opts.contentType.startsWith('video') ? 'video' : 'image'; // Cloudinary stores audio under "video"
     return new Promise((resolve, reject) => {
       const stream = cloudinary.uploader.upload_stream(
         { folder: opts.folder, resource_type: resourceType },
@@ -98,5 +98,7 @@ export const storageService = {
     driver.upload(buffer, { folder: 'scene-images', contentType, extension: contentType.includes('png') ? 'png' : 'jpg' }),
   uploadAudio: (buffer: Buffer, contentType: string) =>
     driver.upload(buffer, { folder: 'voice-tracks', contentType, extension: 'mp3' }),
+  uploadVideo: (buffer: Buffer) =>
+    driver.upload(buffer, { folder: 'renders', contentType: 'video/mp4', extension: 'mp4' }),
   delete: (storageKey: string) => driver.delete(storageKey),
 };

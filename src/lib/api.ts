@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { AspectRatio, BillingStatus, FullProject, Project, User, VoiceCategory, VoiceControls } from './types';
+import { AspectRatio, BillingStatus, RenderJob, FullProject, Project, User, VoiceCategory, VoiceControls } from './types';
 
 // Always relative: in production this project serves both the static site and /api/* from
 // the same Vercel deployment, so "/api" just resolves. In local dev, vite.config.ts proxies
@@ -115,6 +115,20 @@ export const api = {
     async everything(projectId: string, voiceCategory: VoiceCategory, controls: VoiceControls) {
       const { data } = await http.post<FullProject>(`/generate/${projectId}/everything`, { voiceCategory, controls });
       return data;
+    },
+  },
+  render: {
+    async start(projectId: string) {
+      const { data } = await http.post<{ job: RenderJob }>(`/render/${projectId}`);
+      return data.job;
+    },
+    async poll(jobId: string) {
+      const { data } = await http.get<{ job: RenderJob }>(`/render/job/${jobId}`);
+      return data.job;
+    },
+    async list(projectId: string) {
+      const { data } = await http.get<{ jobs: RenderJob[] }>(`/render/${projectId}/jobs`);
+      return data.jobs;
     },
   },
   billing: {

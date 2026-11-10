@@ -125,3 +125,18 @@ export type VoiceCategory =
   | 'news_anchor'
   | 'calm'
   | 'emotional';
+
+export type RenderStatus = 'queued' | 'running' | 'succeeded' | 'failed';
+
+export interface RenderJob {
+  id: string;
+  project_id: string;
+  status: RenderStatus;
+  mode: 'clips' | 'kenburns';
+  watermark: boolean;
+  progress: string;
+  output_url: string | null;
+  error_message: string | null;
+  created_at: string;
+  finished_at: string | null;
+}

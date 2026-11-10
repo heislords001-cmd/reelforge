@@ -5,6 +5,7 @@ import clsx from 'clsx';
 import { AppShell } from '../components/layout/AppShell';
 import { BottomNav, NavTab } from '../components/layout/BottomNav';
 import { TogetherToggle } from '../components/workspace/TogetherToggle';
+import { RenderPanel } from '../components/workspace/RenderPanel';
 import { ScriptEditor } from '../components/script/ScriptEditor';
 import { ImageGrid } from '../components/images/ImageGrid';
 import { VoicePanel } from '../components/voice/VoicePanel';
@@ -16,6 +17,8 @@ type Stage = 'script' | 'images' | 'voice' | null;
 // "video" is the user facing tab name. It maps to the existing per scene image generation,
 // no separate video rendering exists yet, this is a navigation label only.
 type WorkTab = Exclude<NavTab, 'home'>;
+// Keep together toggle away from render tab since render is a separate queue action.
+const TOGETHER_TABS: WorkTab[] = ['script', 'video', 'audio'];
 
 export default function ProjectWorkspace() {
   const { id } = useParams<{ id: string }>();
@@ -26,6 +29,7 @@ export default function ProjectWorkspace() {
   const requested = searchParams.get('tab');
   const [tab, setTab] = useState<WorkTab>(requested === 'video' || requested === 'audio' ? requested : 'script');
   const [together, setTogether] = useState(false);
+  const [billing, setBilling] = useState<{ isPremiumActive: boolean } | null>(null);
   const [runningStage, setRunningStage] = useState<Stage>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -33,6 +37,10 @@ export default function ProjectWorkspace() {
     if (!id) return;
     setData(await api.projects.get(id));
   }, [id]);
+
+  useEffect(() => {
+    api.billing.status().then(setBilling).catch(() => {});
+  }, []);
 
   useEffect(() => {
     setLoading(true);
@@ -99,7 +107,7 @@ export default function ProjectWorkspace() {
   const hasScript = Boolean(script && scenes.length > 0);
   const hasImages = images.some((i) => i.is_selected);
   const hasVoice = voiceTracks.length > 0;
-  const otherTwo: Record<WorkTab, string> = { script: 'video and audio', video: 'script and audio', audio: 'script and video' };
+  const otherTwo: Record<WorkTab, string> = { script: 'video and audio', video: 'script and audio', audio: 'script and video', render: '' };
 
   return (
     <AppShell>
@@ -119,7 +127,9 @@ export default function ProjectWorkspace() {
         <PipelineStepper hasScript={hasScript} hasImages={hasImages} hasVoice={hasVoice} runningStage={runningStage} />
 
         <div className="mt-8">
-          <TogetherToggle on={together} onChange={setTogether} otherTwo={otherTwo[tab]} />
+          {TOGETHER_TABS.includes(tab) && (
+            <TogetherToggle on={together} onChange={setTogether} otherTwo={otherTwo[tab]} />
+          )}
 
           {tab === 'script' &&
             (hasScript ? (
@@ -158,6 +168,16 @@ export default function ProjectWorkspace() {
             ) : (
               <EmptyState title="Write a script first" description="Narration is generated from your script's chapters." />
             ))}
+
+          {tab === 'render' && (
+            <RenderPanel
+              projectId={project.id}
+              hasScript={hasScript}
+              hasImages={hasImages}
+              hasVoice={hasVoice}
+              isPremium={billing?.isPremiumActive ?? false}
+            />
+          )}
         </div>
       </div>
 

@@ -1,9 +1,9 @@
 import { useNavigate } from 'react-router-dom';
-import { Film, Home, ImageIcon, Mic2 } from 'lucide-react';
+import { Film, Home, ImageIcon, Mic2, Video } from 'lucide-react';
 import clsx from 'clsx';
 import { useState } from 'react';
 
-export type NavTab = 'home' | 'script' | 'video' | 'audio';
+export type NavTab = 'home' | 'script' | 'video' | 'audio' | 'render';
 
 interface BottomNavProps {
   active: NavTab;
@@ -15,6 +15,7 @@ const ITEMS: { id: Exclude<NavTab, 'home'>; label: string; icon: typeof Film }[]
   { id: 'script', label: 'Script', icon: Film },
   { id: 'video', label: 'Video', icon: ImageIcon },
   { id: 'audio', label: 'Audio', icon: Mic2 },
+  { id: 'render', label: 'Render', icon: Video },
 ];
 
 export function BottomNav({ active, onTabChange, mostRecentProjectId }: BottomNavProps) {

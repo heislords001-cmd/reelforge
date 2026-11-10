@@ -5,7 +5,9 @@ import { NvidiaFluxProvider } from './image/fluxProvider';
 import { NanoBananaProvider } from './image/nanoBananaProvider';
 import { NvidiaChatterboxProvider } from './voice/chatterboxProvider';
 import { GeminiVideoAnalysisProvider } from './video/geminiVideoProvider';
-import { ImageProvider, ScriptProvider, VideoAnalysisProvider, VoiceProvider } from './types';
+import { MagicHourProvider } from './video/magicHourProvider';
+import { EdgeTtsProvider } from './voice/edgeTtsProvider';
+import { ImageProvider, ImageToVideoProvider, ScriptProvider, VideoAnalysisProvider, VoiceProvider } from './types';
 
 /**
  * The provider registry is the ONLY file in the codebase that imports a concrete vendor
@@ -24,6 +26,7 @@ class ProviderRegistry {
   private imageProviders = new Map<string, ImageProvider>();
   private voiceProviders = new Map<string, VoiceProvider>();
   private videoAnalysisProviders = new Map<string, VideoAnalysisProvider>();
+  private imageToVideoProviders = new Map<string, ImageToVideoProvider>();
 
   private defaultScript = 'nvidia-free';
   private defaultImage = 'nvidia-flux-schnell';
@@ -38,6 +41,16 @@ class ProviderRegistry {
   }
   registerVoiceProvider(provider: VoiceProvider) {
     this.voiceProviders.set(provider.name, provider);
+  }
+
+  registerImageToVideoProvider(provider: ImageToVideoProvider) {
+    this.imageToVideoProviders.set(provider.name, provider);
+  }
+
+  getImageToVideoProvider(name = 'magic-hour'): ImageToVideoProvider {
+    const provider = this.imageToVideoProviders.get(name);
+    if (!provider) throw new Error(`No image to video provider registered under "${name}"`);
+    return provider;
   }
 
   registerVideoAnalysisProvider(provider: VideoAnalysisProvider) {
@@ -80,3 +93,5 @@ providerRegistry.registerImageProvider(new NvidiaFluxProvider());
 providerRegistry.registerImageProvider(new NanoBananaProvider());
 providerRegistry.registerVoiceProvider(new NvidiaChatterboxProvider());
 providerRegistry.registerVideoAnalysisProvider(new GeminiVideoAnalysisProvider());
+providerRegistry.registerImageToVideoProvider(new MagicHourProvider());
+providerRegistry.registerVoiceProvider(new EdgeTtsProvider());

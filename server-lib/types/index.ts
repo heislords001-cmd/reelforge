@@ -155,3 +155,20 @@ export interface GeneratedScript {
   callToAction: string;
   rawMarkdown: string;
 }
+
+export type RenderStatus = 'queued' | 'running' | 'succeeded' | 'failed';
+
+export interface RenderJob {
+  id: string;
+  project_id: string;
+  user_id: string;
+  status: RenderStatus;
+  /** 'clips' = AI animated clips (paid), 'kenburns' = pan and zoom over stills. */
+  mode: 'clips' | 'kenburns';
+  watermark: boolean;
+  progress: string;
+  output_url: string | null;
+  error_message: string | null;
+  created_at: string;
+  finished_at: string | null;
+}

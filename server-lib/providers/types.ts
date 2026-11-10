@@ -63,3 +63,18 @@ export interface VideoAnalysisProvider {
   /** Watches a public video and returns its storyline pattern, never its wording. */
   analyzeVideo(url: string): Promise<VideoBlueprint>;
 }
+
+export interface ImageToVideoInput {
+  /** Publicly reachable URL of the still to animate. */
+  imageUrl: string;
+  /** Describes the motion, not the content. */
+  prompt: string;
+  seconds: number;
+}
+
+export interface ImageToVideoProvider {
+  readonly name: string;
+  readonly model: string;
+  /** Resolves with the finished clip as MP4 bytes. Can take minutes. */
+  generateClip(input: ImageToVideoInput): Promise<{ buffer: Buffer; contentType: 'video/mp4' }>;
+}

@@ -181,3 +181,21 @@ CREATE TABLE IF NOT EXISTS api_keys (
   created_at      TIMESTAMPTZ NOT NULL DEFAULT now(),
   revoked_at      TIMESTAMPTZ
 );
+
+-- One row per video render. Rendering takes minutes, so the API answers right away with a
+-- job id and the client polls this row for progress and the finished file's URL.
+CREATE TABLE IF NOT EXISTS render_jobs (
+  id              UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  project_id      UUID NOT NULL REFERENCES projects(id) ON DELETE CASCADE,
+  user_id         UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  status          TEXT NOT NULL DEFAULT 'queued' CHECK (status IN ('queued','running','succeeded','failed')),
+  mode            TEXT NOT NULL DEFAULT 'kenburns' CHECK (mode IN ('clips','kenburns')),
+  watermark       BOOLEAN NOT NULL DEFAULT true,
+  progress        TEXT NOT NULL DEFAULT '',
+  output_url      TEXT,
+  error_message   TEXT,
+  created_at      TIMESTAMPTZ NOT NULL DEFAULT now(),
+  finished_at     TIMESTAMPTZ
+);
+CREATE INDEX IF NOT EXISTS idx_render_jobs_project ON render_jobs(project_id, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_render_jobs_user_status ON render_jobs(user_id, status);

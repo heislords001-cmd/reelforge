@@ -12,3 +12,6 @@ apiRouter.use('/auth', authRouter);
 apiRouter.use('/projects', projectRouter);
 apiRouter.use('/generate', generateRouter);
 apiRouter.use('/billing', billingRouter);
+
+import { renderRouter } from './render.routes';
+apiRouter.use('/render', renderRouter);
