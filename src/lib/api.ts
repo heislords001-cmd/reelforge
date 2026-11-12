@@ -6,6 +6,15 @@ import { AspectRatio, BillingStatus, RenderJob, FullProject, Project, User, Voic
 // "/api" to the standalone Express server on :4000. Either way, no env var to keep in sync.
 export const http = axios.create({ baseURL: '/api' });
 
+export async function fetchAuthConfig(): Promise<{ google: boolean }> {
+  try {
+    const { data } = await http.get<{ google: boolean }>('/auth/config');
+    return data;
+  } catch {
+    return { google: false };
+  }
+}
+
 /** Creation settings chosen on Home. All optional, the server has sensible defaults. */
 export interface ProjectOptions {
   targetLengthMinutes?: number;
@@ -108,8 +117,13 @@ export const api = {
       const { data } = await http.post<FullProject>(`/generate/${projectId}/images/${sceneId}/select`, { imageId });
       return data;
     },
-    async voice(projectId: string, voiceCategory: VoiceCategory, controls: VoiceControls) {
-      const { data } = await http.post<FullProject>(`/generate/${projectId}/voice`, { voiceCategory, controls });
+    /** Every voice the narration provider offers, grouped by locale in the UI. */
+    async voices() {
+      const { data } = await http.get<{ voices: { ShortName: string; Gender: string; Locale: string }[] }>('/generate/voices');
+      return data.voices;
+    },
+    async voice(projectId: string, voiceCategory: VoiceCategory, controls: VoiceControls, voiceName?: string) {
+      const { data } = await http.post<FullProject>(`/generate/${projectId}/voice`, { voiceCategory, controls, voiceName });
       return data;
     },
     async everything(projectId: string, voiceCategory: VoiceCategory, controls: VoiceControls) {

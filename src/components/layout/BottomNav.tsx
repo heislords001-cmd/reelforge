@@ -41,7 +41,7 @@ export function BottomNav({ active, onTabChange, mostRecentProjectId }: BottomNa
           onClick={() => navigate('/dashboard')}
           className={clsx('flex w-16 flex-col items-center gap-1 border-none bg-transparent text-[10.5px] font-medium', active === 'home' ? 'text-signal-300' : 'text-ink-faint')}
         >
-          <Home size={20} className={clsx(active === 'home' && 'drop-shadow-[0_0_6px_rgba(177,74,255,0.8)]')} />
+          <Home size={20} className={clsx(active === 'home' && 'drop-shadow-[0_0_6px_rgba(126,107,196,0.7)]')} />
           Home
         </button>
         {ITEMS.map((item) => (
@@ -50,7 +50,7 @@ export function BottomNav({ active, onTabChange, mostRecentProjectId }: BottomNa
             onClick={() => handleTap(item.id)}
             className={clsx('flex w-16 flex-col items-center gap-1 border-none bg-transparent text-[10.5px] font-medium', active === item.id ? 'text-signal-300' : 'text-ink-faint')}
           >
-            <item.icon size={20} className={clsx(active === item.id && 'drop-shadow-[0_0_6px_rgba(177,74,255,0.8)]')} />
+            <item.icon size={20} className={clsx(active === item.id && 'drop-shadow-[0_0_6px_rgba(126,107,196,0.7)]')} />
             {item.label}
           </button>
         ))}

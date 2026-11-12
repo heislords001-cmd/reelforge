@@ -1,3 +1,4 @@
+import path from 'path';
 import cookieParser from 'cookie-parser';
 import cors from 'cors';
 import express from 'express';
@@ -58,6 +59,22 @@ export function createApp() {
   app.use('/api', generalLimiter);
 
   app.use('/api', apiRouter);
+
+  // Single service hosting (Render): also serve the built frontend. Off by default, so
+  // Vercel (which serves the frontend itself) is unaffected. Only non-API GET requests fall
+  // through to index.html, so client side routes like /dashboard work on refresh.
+  if (process.env.SERVE_UI === 'true') {
+    // Relative to the working directory (the project root under npm start and in the container).
+    const dist = path.resolve(process.cwd(), 'dist');
+    app.use(express.static(dist));
+    app.use((req, res, next) => {
+      if (req.method === 'GET' && !req.path.startsWith('/api')) {
+        return res.sendFile(path.join(dist, 'index.html'));
+      }
+      next();
+    });
+  }
+
 
   app.use(notFoundHandler);
   app.use(errorHandler);

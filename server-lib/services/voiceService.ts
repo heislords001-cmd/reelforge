@@ -11,10 +11,11 @@ async function synthesizeAndStore(
   projectId: string,
   scene: Scene,
   voiceCategory: VoiceCategory,
-  controls: VoiceControls
+  controls: VoiceControls,
+  voiceName?: string
 ): Promise<VoiceTrack> {
   const provider = providerRegistry.getVoiceProvider();
-  const result = await provider.synthesize({ text: scene.narration_text, voiceCategory, controls });
+  const result = await provider.synthesize({ text: scene.narration_text, voiceCategory, voiceName, controls });
   const uploaded = await storageService.uploadAudio(result.buffer, result.contentType);
 
   const { rows } = await query<VoiceTrack>(
@@ -27,9 +28,9 @@ async function synthesizeAndStore(
       uploaded.url,
       uploaded.storageKey,
       result.durationSeconds ?? null,
-      JSON.stringify(controls),
+      JSON.stringify({ ...controls, voiceName: voiceName ?? null }),
       provider.name,
-      'chatterbox-tts',
+      provider.model,
     ]
   );
   return rows[0];
@@ -49,15 +50,28 @@ async function assertVoiceCategoryAllowed(userId: string, voiceCategory: VoiceCa
   }
 }
 
+/** A specific voice is a premium feature, same rule as the premium style categories. */
+async function assertVoiceNameAllowed(userId: string, voiceName: string | undefined) {
+  if (!voiceName) return;
+  const planFields = await subscriptionService.getPlanFields(userId).catch(() => {
+    throw ApiError.notFound('User not found');
+  });
+  if (!subscriptionService.isPremiumActive(planFields)) {
+    throw ApiError.forbidden('Choosing a specific voice is a Premium feature. Pick one of the free styles, or upgrade.');
+  }
+}
+
 export const voiceService = {
   async generateAll(
     projectId: string,
     userId: string,
     voiceCategory: VoiceCategory,
-    controls: VoiceControls = DEFAULT_VOICE_CONTROLS
+    controls: VoiceControls = DEFAULT_VOICE_CONTROLS,
+    voiceName?: string
   ) {
     await projectService.getOwned(projectId, userId);
     await assertVoiceCategoryAllowed(userId, voiceCategory);
+    await assertVoiceNameAllowed(userId, voiceName);
 
     const { rows: scenes } = await query<Scene>(
       'SELECT * FROM scenes WHERE project_id = $1 ORDER BY order_index ASC',
@@ -77,11 +91,11 @@ export const voiceService = {
       // Clear previous narration so regenerating with a new voice/controls doesn't leave stale tracks.
       await query('DELETE FROM voice_tracks WHERE project_id = $1', [projectId]);
 
-      await mapWithConcurrency(scenes, 3, (scene) => synthesizeAndStore(projectId, scene, voiceCategory, controls));
+      await mapWithConcurrency(scenes, 3, (scene) => synthesizeAndStore(projectId, scene, voiceCategory, controls, voiceName));
 
       await query(
         `UPDATE projects SET settings = settings || $2::jsonb, status = 'voice_ready', updated_at = now() WHERE id = $1`,
-        [projectId, JSON.stringify({ voiceCategory, voiceControls: controls })]
+        [projectId, JSON.stringify({ voiceCategory, voiceName: voiceName ?? null, voiceControls: controls })]
       );
       await query(`UPDATE generation_jobs SET status = 'succeeded', finished_at = now() WHERE id = $1`, [jobId]);
     } catch (err) {
@@ -101,10 +115,12 @@ export const voiceService = {
     projectId: string,
     userId: string,
     voiceCategory: VoiceCategory,
-    controls: VoiceControls = DEFAULT_VOICE_CONTROLS
+    controls: VoiceControls = DEFAULT_VOICE_CONTROLS,
+    voiceName?: string
   ) {
     await projectService.getOwned(projectId, userId);
     await assertVoiceCategoryAllowed(userId, voiceCategory);
+    await assertVoiceNameAllowed(userId, voiceName);
 
     const { rows } = await query<Scene>('SELECT * FROM scenes WHERE id = $1 AND project_id = $2', [
       sceneId,
@@ -114,6 +130,6 @@ export const voiceService = {
     if (!scene) throw ApiError.notFound('Scene not found');
 
     await query('DELETE FROM voice_tracks WHERE scene_id = $1', [sceneId]);
-    return synthesizeAndStore(projectId, scene, voiceCategory, controls);
+    return synthesizeAndStore(projectId, scene, voiceCategory, controls, voiceName);
   },
 };

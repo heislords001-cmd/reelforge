@@ -30,7 +30,7 @@ class ProviderRegistry {
 
   private defaultScript = 'nvidia-free';
   private defaultImage = 'nvidia-flux-schnell';
-  private defaultVoice = 'nvidia-chatterbox';
+  private defaultVoice = 'edge-tts';
   private defaultVideoAnalysis = 'gemini-video';
 
   registerScriptProvider(provider: ScriptProvider) {

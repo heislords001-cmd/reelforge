@@ -43,6 +43,8 @@ export interface ImageProvider {
 export interface VoiceSynthesisInput {
   text: string;
   voiceCategory: VoiceCategory;
+  /** A specific provider voice, e.g. en-US-AriaNeural. Overrides the category's voice. */
+  voiceName?: string;
   controls: VoiceControls;
 }
 
@@ -54,6 +56,7 @@ export interface VoiceSynthesisResult {
 
 export interface VoiceProvider {
   readonly name: string;
+  readonly model: string;
   synthesize(input: VoiceSynthesisInput): Promise<VoiceSynthesisResult>;
 }
 

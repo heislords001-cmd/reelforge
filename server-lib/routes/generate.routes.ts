@@ -5,6 +5,7 @@ import { asyncHandler } from '../middleware/asyncHandler';
 import { scriptService } from '../services/scriptService';
 import { imageService } from '../services/imageService';
 import { voiceService } from '../services/voiceService';
+import { listEdgeVoices } from '../providers/voice/edgeTtsProvider';
 import { projectService } from '../services/projectService';
 import { providerRegistry } from '../providers/registry';
 import { ASPECT_RATIOS, DEFAULT_VOICE_CONTROLS, IMAGE_STYLES, VOICE_CATEGORIES } from '../types';
@@ -13,7 +14,10 @@ import { ApiError } from '../utils/ApiError';
 export const generateRouter = Router();
 generateRouter.use(requireAuth);
 
+const voiceNameSchema = z.string().trim().min(2).max(80).regex(/^[a-z]{2,3}(-[A-Za-z0-9]+)+$/, 'Unknown voice name');
+
 const voiceSchema = z.object({
+  voiceName: voiceNameSchema.optional(),
   voiceCategory: z.enum(VOICE_CATEGORIES),
   controls: z
     .object({
@@ -114,6 +118,14 @@ generateRouter.post(
   })
 );
 
+// GET /api/generate/voices: every voice the default narration provider offers.
+generateRouter.get(
+  '/voices',
+  asyncHandler(async (_req, res) => {
+    res.json({ voices: await listEdgeVoices() });
+  })
+);
+
 // POST /api/generate/:projectId/voice
 generateRouter.post(
   '/:projectId/voice',
@@ -122,7 +134,7 @@ generateRouter.post(
     if (!parsed.success) throw ApiError.badRequest('Invalid voice settings', parsed.error.flatten());
 
     const controls = { ...DEFAULT_VOICE_CONTROLS, ...parsed.data.controls };
-    const full = await voiceService.generateAll(req.params.projectId, req.user!.userId, parsed.data.voiceCategory, controls);
+    const full = await voiceService.generateAll(req.params.projectId, req.user!.userId, parsed.data.voiceCategory, controls, parsed.data.voiceName);
     res.json(full);
   })
 );
@@ -140,8 +152,7 @@ generateRouter.post(
       req.params.projectId,
       req.user!.userId,
       parsed.data.voiceCategory,
-      controls
-    );
+      controls, parsed.data.voiceName);
     res.json({ voiceTrack: track });
   })
 );
@@ -158,6 +169,7 @@ generateRouter.post(
 // (see ProjectWorkspace.tsx runEverything), which is safe under a duration limit either way.
 const everythingSchema = z.object({
   voiceCategory: z.enum(VOICE_CATEGORIES).default('documentary_male'),
+  voiceName: voiceNameSchema.optional(),
   controls: voiceSchema.shape.controls.optional(),
 });
 
@@ -173,7 +185,7 @@ generateRouter.post(
 
     await scriptService.generate({ projectId, userId });
     await imageService.generateAll(projectId, userId);
-    const full = await voiceService.generateAll(projectId, userId, parsed.data.voiceCategory, controls);
+    const full = await voiceService.generateAll(projectId, userId, parsed.data.voiceCategory, controls, parsed.data.voiceName);
 
     res.json(full);
   })

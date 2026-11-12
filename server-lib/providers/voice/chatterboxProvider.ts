@@ -24,6 +24,7 @@ const VOICE_CATEGORY_MAP: Record<VoiceCategory, string> = {
 
 export class NvidiaChatterboxProvider implements VoiceProvider {
   readonly name = 'nvidia-chatterbox';
+  readonly model = env.nvidia.chatterboxModel;
 
   async synthesize(input: VoiceSynthesisInput): Promise<VoiceSynthesisResult> {
     if (!env.nvidia.apiKey) {

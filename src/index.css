@@ -21,15 +21,15 @@
     @apply bg-base text-ink font-sans antialiased;
     /* Matte, mostly flat black. Just enough neon glow at the edges to read as lit from
        somewhere, not the soft all-over atmospheric wash the previous violet theme had. */
-    background-image: radial-gradient(35% 30% at 50% -5%, rgba(177,74,255,0.12) 0%, rgba(5,5,5,0) 60%),
-      radial-gradient(30% 30% at 95% 5%, rgba(255,46,154,0.08) 0%, rgba(5,5,5,0) 60%);
+    background-image: radial-gradient(35% 30% at 50% -5%, rgba(126,107,196,0.10) 0%, rgba(5,5,5,0) 60%),
+      radial-gradient(30% 30% at 95% 5%, rgba(196,154,108,0.07) 0%, rgba(5,5,5,0) 60%);
     background-attachment: fixed;
   }
   ::selection {
-    background: rgba(177, 74, 255, 0.35);
+    background: rgba(126, 107, 196, 0.35);
   }
   :focus-visible {
-    outline: 2px solid #B14AFF;
+    outline: 2px solid #7E6BC4;
     outline-offset: 2px;
     border-radius: 4px;
   }

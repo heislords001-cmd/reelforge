@@ -52,6 +52,12 @@ authRouter.get(
   })
 );
 
+// GET /api/auth/config. Public. Tells the client which sign in methods are actually
+// configured on this deployment, so the Google button only shows when it will work.
+authRouter.get('/config', (_req, res) => {
+  res.json({ google: Boolean(env.google.clientId && env.google.clientSecret && env.google.callbackUrl) });
+});
+
 // GET /api/auth/google. Kicks off the redirect flow. The frontend just points a link or
 // window.location at this URL directly, there is no JSON response here, only a redirect.
 authRouter.get(

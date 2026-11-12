@@ -34,6 +34,15 @@ export function VoicePanel({ projectId, scenes, voiceTracks, onChanged }: Props)
     api.billing.status().then((s) => setPremium(s.isPremiumActive)).catch(() => {});
   }, []);
 
+  // Full voice list from the narration provider. Loaded once, shown grouped by locale.
+  const [voices, setVoices] = useState<{ ShortName: string; Gender: string; Locale: string }[]>([]);
+  const [voiceName, setVoiceName] = useState('');
+  const [voicesError, setVoicesError] = useState<string | null>(null);
+  useEffect(() => {
+    api.generate.voices().then(setVoices).catch(() => setVoicesError('Could not load the voice list right now.'));
+  }, []);
+  const locales = Array.from(new Set(voices.map((v) => v.Locale))).sort();
+
   const isLocked = (id: VoiceCategory) => premium === false && PREMIUM_VOICE_CATEGORIES.includes(id);
 
   // A project voiced during the trial may use a premium style. Once the trial ends, fall
@@ -48,7 +57,7 @@ export function VoicePanel({ projectId, scenes, voiceTracks, onChanged }: Props)
     setError(null);
     setGenerating(true);
     try {
-      await api.generate.voice(projectId, category, controls);
+      await api.generate.voice(projectId, category, controls, voiceName || undefined);
       onChanged();
     } catch (err) {
       setError(errorMessage(err, 'Could not generate narration. Please try again.'));
@@ -61,6 +70,38 @@ export function VoicePanel({ projectId, scenes, voiceTracks, onChanged }: Props)
     <div className="space-y-6">
       <div className="glass-card p-5">
         <p className="label-eyebrow mb-3">Voice</p>
+        <div className="mb-5">
+          <label className="label-eyebrow mb-1.5 block">Specific voice</label>
+          <select
+            value={voiceName}
+            onChange={(e) => {
+              if (premium === false && e.target.value) {
+                setError('Choosing a specific voice is a Premium feature. Use one of the styles below, or upgrade.');
+                return;
+              }
+              setError(null);
+              setVoiceName(e.target.value);
+            }}
+            className="input-field appearance-none [&>option]:bg-[#0D0D0D]"
+          >
+            <option value="">Use the style selected below</option>
+            {locales.map((locale) => (
+              <optgroup key={locale} label={locale}>
+                {voices
+                  .filter((v) => v.Locale === locale)
+                  .map((v) => (
+                    <option key={v.ShortName} value={v.ShortName}>
+                      {v.ShortName.replace(/Neural$/, '')} ({v.Gender})
+                    </option>
+                  ))}
+              </optgroup>
+            ))}
+          </select>
+          {voicesError && <p className="mt-1.5 text-xs text-ember-400">{voicesError}</p>}
+          {premium === false && (
+            <p className="mt-1.5 text-[11px] text-ink-faint">Specific voices are part of Premium. Free accounts choose a style.</p>
+          )}
+        </div>
         <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
           {VOICE_CATEGORIES.map((v) => (
             <button

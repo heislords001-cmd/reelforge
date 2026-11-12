@@ -1,7 +1,7 @@
 import { FormEvent, useEffect, useState } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { Clapperboard } from 'lucide-react';
-import { api, errorMessage } from '../lib/api';
+import { api, errorMessage, fetchAuthConfig } from '../lib/api';
 import { useAuthStore } from '../store/authStore';
 import { Spinner } from '../components/ui/Primitives';
 import { GoogleButton } from '../components/auth/GoogleButton';
@@ -16,9 +16,14 @@ export default function Login() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [googleEnabled, setGoogleEnabled] = useState(false);
   const setSession = useAuthStore((s) => s.setSession);
   const navigate = useNavigate();
   const [params] = useSearchParams();
+
+  useEffect(() => {
+    fetchAuthConfig().then((cfg) => setGoogleEnabled(cfg.google));
+  }, []);
 
   useEffect(() => {
     const code = params.get('error');
@@ -54,13 +59,16 @@ export default function Login() {
         <div className="glass-card space-y-4 p-6">
           {error && <p className="rounded-lg bg-ember-500/10 px-3 py-2 text-xs text-ember-400">{error}</p>}
 
-          <GoogleButton label="Continue with Google" />
-
-          <div className="flex items-center gap-3 py-1">
-            <div className="h-px flex-1 bg-white/[0.08]" />
-            <span className="text-[11px] text-ink-faint">or</span>
-            <div className="h-px flex-1 bg-white/[0.08]" />
-          </div>
+          {googleEnabled && (
+            <>
+              <GoogleButton label="Continue with Google" />
+              <div className="flex items-center gap-3 py-1">
+                <div className="h-px flex-1 bg-white/[0.08]" />
+                <span className="text-[11px] text-ink-faint">or</span>
+                <div className="h-px flex-1 bg-white/[0.08]" />
+              </div>
+            </>
+          )}
 
           <form onSubmit={onSubmit} className="space-y-4">
             <div>
