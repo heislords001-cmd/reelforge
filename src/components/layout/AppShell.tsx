@@ -22,7 +22,7 @@ export function AppShell({ children }: PropsWithChildren) {
   return (
     <div className="min-h-screen">
       <header className="sticky top-0 z-30 border-b border-white/[0.06] bg-base/70 backdrop-blur-xl">
-        <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
+        <div className="flex w-full items-center justify-between px-6 py-4 lg:px-12">
           <Link to="/dashboard" className="flex items-center gap-2.5">
             <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-signal-gradient">
               <Clapperboard className="h-4.5 w-4.5 text-white" size={18} />
@@ -54,7 +54,7 @@ export function AppShell({ children }: PropsWithChildren) {
           </div>
         </div>
       </header>
-      <main className="mx-auto max-w-7xl px-6 py-10">{children}</main>
+      <main className="w-full px-6 py-10 lg:px-12">{children}</main>
     </div>
   );
 }
