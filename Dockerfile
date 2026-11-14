@@ -14,6 +14,7 @@ COPY . .
 RUN npm run build
 
 ENV NODE_ENV=production \
+    NODE_OPTIONS=--dns-result-order=ipv4first \
     SERVE_UI=true \
     RENDER_ENABLED=true \
     FFMPEG_PATH=/usr/bin/ffmpeg \
