@@ -1,3 +1,4 @@
+import net from 'net';
 import { Pool } from 'pg';
 import { env } from './env';
 
@@ -22,11 +23,23 @@ import { env } from './env';
  * On a traditional host (Railway, Render, your own VPS) this file works unchanged. Max:1
  * is a little conservative there but harmless, since only one process is using the pool.
  */
+const dbUrl = new URL(env.databaseUrl);
+
 export const pool = new Pool({
   connectionString: env.databaseUrl,
   max: env.isServerless ? 1 : 10,
   idleTimeoutMillis: 10_000,
   connectionTimeoutMillis: 5_000,
+  // On Render, outbound IPv6 is unreachable, and Neon's hostname can resolve to IPv6 only from
+  // there. Asking the socket for IPv4 (family: 4) avoids that. Production only, so local
+  // development keeps the default behaviour. TLS still uses the hostname for SNI and
+  // certificate checks, because pg sets servername from the host.
+  ...(env.nodeEnv === 'production'
+    ? {
+        stream: () =>
+          net.connect({ host: dbUrl.hostname, port: Number(dbUrl.port || 5432), family: 4 }),
+      }
+    : {}),
   // Neon, Supabase, and most managed Postgres hosts require TLS. Relying on `sslmode=require`
   // in the connection string alone is not always enough. Node's pg driver can still fail to
   // establish trust in a serverless environment, so this is set explicitly. RejectUnauthorized
