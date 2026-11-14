@@ -11,6 +11,9 @@ function required(name: string, fallback?: string): string {
 
 export const env = {
   port: Number(process.env.PORT ?? 4000),
+  // Apply schema.sql when the server starts. On by default because Render's pre-deploy
+  // command needs a paid plan. Safe to repeat. Set AUTO_MIGRATE=false to turn it off.
+  autoMigrate: process.env.AUTO_MIGRATE !== 'false',
   nodeEnv: process.env.NODE_ENV ?? 'development',
   clientOrigin: process.env.CLIENT_ORIGIN ?? 'http://localhost:5173',
 
